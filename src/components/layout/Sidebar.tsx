@@ -2,7 +2,7 @@ import { useCabinetStore } from '../../store/cabinetStore'
 import type { GameList } from '../../types'
 
 const lists: { id: GameList; label: string; icon: string }[] = [
-  { id: 'cabinet', label: 'Cabinet', icon: '🗃️' },
+  { id: 'cabinet', label: 'My Cabinet', icon: '🗃️' },
   { id: 'backlog', label: 'Backlog', icon: '📋' },
   { id: 'wishlist', label: 'Wishlist', icon: '✨' },
 ]

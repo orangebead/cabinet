@@ -152,12 +152,12 @@ export function GameModal({ game, onClose }: { game: CabinetGame; onClose: () =>
                 const s = listStyles[l]
                 return (
                   <button key={l} onClick={() => { moveToList(game.id, l); close() }} style={{ flex: 1, padding: '11px 16px', borderRadius: 10, border: `1px solid ${s.border}`, background: s.bg, color: s.color, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', transition: 'filter 0.15s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }} onMouseEnter={e => (e.currentTarget.style.filter = 'brightness(1.2)')} onMouseLeave={e => (e.currentTarget.style.filter = 'brightness(1)')}>
-                    {s.icon} Move to {l.charAt(0).toUpperCase() + l.slice(1)}
+                    Move to {l.charAt(0).toUpperCase() + l.slice(1)}
                   </button>
                 )
               })}
               <button onClick={() => { removeGame(game.id); close() }} style={{ padding: '11px 16px', borderRadius: 10, border: 'none', background: '#3f1a1a', color: '#f87171', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }} onMouseEnter={e => (e.currentTarget.style.background = '#5a2020')} onMouseLeave={e => (e.currentTarget.style.background = '#3f1a1a')}>
-                🗑 Remove
+                Remove
               </button>
             </div>
 
