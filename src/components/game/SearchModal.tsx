@@ -5,7 +5,13 @@ import type { GameList, RawgGame } from '../../types'
 
 interface Props { onClose: () => void; defaultList?: GameList }
 
-export function SearchModal({ onClose, defaultList = 'cabinet' }: Props) {
+interface Props {
+  onClose: () => void
+  defaultList?: GameList
+  userId: string        // ← add this
+}
+
+export function SearchModal({ onClose, defaultList = 'cabinet', userId }: Props) {
   const [query, setQuery] = useState('')
   const [debouncedQuery, setDebouncedQuery] = useState('')
   const [added, setAdded] = useState<Set<number>>(new Set())
@@ -35,7 +41,7 @@ export function SearchModal({ onClose, defaultList = 'cabinet' }: Props) {
   }
 
   const handleAdd = (game: RawgGame, list: GameList) => {
-    addGame(game, list)
+    addGame(game, list, userId)   // ← pass userId
     setAdded(prev => new Set(prev).add(game.id))
   }
 

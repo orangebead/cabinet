@@ -4,7 +4,7 @@ import { useCabinetStore, STATUSES, STATUS_LABELS, STATUS_COLORS } from '../../s
 import { fetchGameDetails } from '../../lib/gameDetailsCache'
 import type { CabinetGame, GameList, GameDetails } from '../../types'
 
-export function GameModal({ game, onClose }: { game: CabinetGame; onClose: () => void }) {
+export function GameModal({ game, onClose, readOnly = false }: { game: CabinetGame; onClose: () => void; readOnly?: boolean }) {
   const [mounted, setMounted] = useState(false)
   const [details, setDetails] = useState<GameDetails | null>(null)
   const [editMode, setEditMode] = useState(false)
@@ -30,7 +30,6 @@ export function GameModal({ game, onClose }: { game: CabinetGame; onClose: () =>
     updateRating(game.id, pendingRating)
     updateReview(game.id, pendingReview || null)
     setDirty(false)
-    close()
   }
 
   const publisher = details?.publishers?.[0]?.name
@@ -74,7 +73,9 @@ export function GameModal({ game, onClose }: { game: CabinetGame; onClose: () =>
             }
             <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, var(--surface) 0%, rgba(0,0,0,0.1) 60%)', borderRadius: '20px 20px 0 0' }} />
             <div style={{ position: 'absolute', bottom: 20, left: 28, right: 60 }}>
-              <h2 style={{ margin: '0 0 6px', fontFamily: 'Bebas Neue', fontSize: 34, letterSpacing: 1.5, color: '#fff', textShadow: '0 2px 12px rgba(0,0,0,0.8)', lineHeight: 1 }}>{game.title}</h2>
+              <h2 style={{ margin: '0 0 6px', fontFamily: 'Bebas Neue', fontSize: 34, letterSpacing: 1.5, color: '#fff', textShadow: '0 2px 12px rgba(0,0,0,0.8)', lineHeight: 1 }}>
+                {game.title}
+              </h2>
               <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                 {publisher && <span style={{ color: 'rgba(255,255,255,0.75)', fontSize: 13, fontWeight: 500 }}>{publisher}</span>}
                 {publisher && year && <span style={{ color: 'rgba(255,255,255,0.3)' }}>·</span>}
@@ -82,84 +83,153 @@ export function GameModal({ game, onClose }: { game: CabinetGame; onClose: () =>
                 {!details && <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: 12, fontStyle: 'italic' }}>Loading...</span>}
               </div>
             </div>
-            <button onClick={close} style={{ position: 'absolute', top: 14, right: 14, width: 32, height: 32, borderRadius: '50%', border: 'none', background: 'rgba(0,0,0,0.6)', color: '#fff', cursor: 'pointer', fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)' }}>✕</button>
+            {readOnly && (
+              <div style={{ position: 'absolute', top: 14, left: 14, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', color: 'var(--muted)', fontSize: 11, fontWeight: 600, padding: '4px 10px', borderRadius: 6, letterSpacing: 0.5 }}>
+                👁 View Only
+              </div>
+            )}
+            <button onClick={close} style={{ position: 'absolute', top: 14, right: 14, width: 32, height: 32, borderRadius: '50%', border: 'none', background: 'rgba(0,0,0,0.6)', color: '#fff', cursor: 'pointer', fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)', transition: 'background 0.15s' }}
+              onMouseEnter={e => (e.currentTarget.style.background = 'rgba(0,0,0,0.9)')}
+              onMouseLeave={e => (e.currentTarget.style.background = 'rgba(0,0,0,0.6)')}
+            >✕</button>
           </div>
 
           {/* Body */}
           <div style={{ padding: '24px 28px 28px', display: 'flex', flexDirection: 'column', gap: 24 }}>
 
-            {/* Status */}
-            <Section label="STATUS">
-              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                {STATUSES.map(s => (
-                  <button key={s} onClick={() => markDirty(setPendingStatus)(s)} style={{ padding: '8px 18px', borderRadius: 8, border: 'none', background: pendingStatus === s ? STATUS_COLORS[s] : 'var(--surface2)', color: pendingStatus === s ? (s === 'unplayed' ? '#fff' : '#000') : 'var(--muted)', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', transition: 'all 0.15s', transform: pendingStatus === s ? 'scale(1.05)' : 'scale(1)', boxShadow: pendingStatus === s ? `0 4px 16px ${STATUS_COLORS[s]}55` : 'none' }}>
-                    {STATUS_LABELS[s]}
-                  </button>
-                ))}
-              </div>
-            </Section>
+            {/* Status — editable only */}
+            {!readOnly && (
+              <Section label="STATUS">
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  {STATUSES.map(s => (
+                    <button key={s} onClick={() => markDirty(setPendingStatus)(s)} style={{ padding: '8px 18px', borderRadius: 8, border: 'none', background: pendingStatus === s ? STATUS_COLORS[s] : 'var(--surface2)', color: pendingStatus === s ? (s === 'unplayed' ? '#fff' : '#000') : 'var(--muted)', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', transition: 'all 0.15s', transform: pendingStatus === s ? 'scale(1.05)' : 'scale(1)', boxShadow: pendingStatus === s ? `0 4px 16px ${STATUS_COLORS[s]}55` : 'none' }}>
+                      {STATUS_LABELS[s]}
+                    </button>
+                  ))}
+                </div>
+              </Section>
+            )}
 
-            {/* Rating */}
-            <Section label="RATING">
-              <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
-                {[1,2,3,4,5,6,7,8,9,10].map(n => (
-                  <button key={n} onClick={() => markDirty(setPendingRating)(pendingRating === n ? null : n)} style={{ width: 38, height: 38, borderRadius: 8, border: 'none', background: (pendingRating ?? 0) >= n ? 'var(--accent)' : 'var(--surface2)', color: (pendingRating ?? 0) >= n ? '#000' : 'var(--muted)', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', transition: 'all 0.12s', transform: (pendingRating ?? 0) >= n ? 'scale(1.1)' : 'scale(1)' }}>
-                    {n}
-                  </button>
-                ))}
-                {pendingRating && <span style={{ marginLeft: 8, fontFamily: 'Bebas Neue', fontSize: 28, color: 'var(--accent)', letterSpacing: 1 }}>{pendingRating}/10</span>}
-              </div>
-            </Section>
+            {/* Status — read only badge */}
+            {readOnly && (
+              <Section label="STATUS">
+                <span style={{ display: 'inline-block', background: STATUS_COLORS[game.status], color: game.status === 'unplayed' ? '#fff' : '#000', fontSize: 13, fontWeight: 700, padding: '6px 14px', borderRadius: 8 }}>
+                  {STATUS_LABELS[game.status]}
+                </span>
+              </Section>
+            )}
+
+            {/* Rating — editable */}
+            {!readOnly && (
+              <Section label="RATING">
+                <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+                  {[1,2,3,4,5,6,7,8,9,10].map(n => (
+                    <button key={n} onClick={() => markDirty(setPendingRating)(pendingRating === n ? null : n)} style={{ width: 38, height: 38, borderRadius: 8, border: 'none', background: (pendingRating ?? 0) >= n ? 'var(--accent)' : 'var(--surface2)', color: (pendingRating ?? 0) >= n ? '#000' : 'var(--muted)', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', transition: 'all 0.12s', transform: (pendingRating ?? 0) >= n ? 'scale(1.1)' : 'scale(1)' }}>
+                      {n}
+                    </button>
+                  ))}
+                  {pendingRating && (
+                    <span style={{ marginLeft: 8, fontFamily: 'Bebas Neue', fontSize: 28, color: 'var(--accent)', letterSpacing: 1 }}>{pendingRating}/10</span>
+                  )}
+                </div>
+              </Section>
+            )}
+
+            {/* Rating — read only */}
+            {readOnly && game.rating && (
+              <Section label="RATING">
+                <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+                  {[1,2,3,4,5,6,7,8,9,10].map(n => (
+                    <div key={n} style={{ width: 38, height: 38, borderRadius: 8, background: (game.rating ?? 0) >= n ? 'var(--accent)' : 'var(--surface2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: (game.rating ?? 0) >= n ? '#000' : 'var(--muted)', fontSize: 14, fontWeight: 700 }}>
+                      {n}
+                    </div>
+                  ))}
+                  <span style={{ marginLeft: 8, fontFamily: 'Bebas Neue', fontSize: 28, color: 'var(--accent)', letterSpacing: 1 }}>{game.rating}/10</span>
+                </div>
+              </Section>
+            )}
 
             {/* Review */}
             <Section label={
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              readOnly ? (
                 <span>REVIEW</span>
-                <div onClick={() => setEditMode(e => !e)} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', userSelect: 'none' }}>
-                  <span style={{ fontSize: 11, color: !editMode ? 'var(--text)' : 'var(--muted)', fontWeight: !editMode ? 600 : 400, transition: 'color 0.2s' }}>View</span>
-                  <div style={{ width: 40, height: 22, borderRadius: 11, background: editMode ? 'var(--accent)' : 'var(--surface2)', border: '1px solid var(--border)', position: 'relative', transition: 'background 0.2s', flexShrink: 0 }}>
-                    <div style={{ position: 'absolute', top: 3, left: editMode ? 20 : 3, width: 14, height: 14, borderRadius: '50%', background: editMode ? '#000' : 'var(--muted)', transition: 'left 0.2s ease, background 0.2s' }} />
+              ) : (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <span>REVIEW</span>
+                  <div onClick={() => setEditMode(e => !e)} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', userSelect: 'none' }}>
+                    <span style={{ fontSize: 11, color: !editMode ? 'var(--text)' : 'var(--muted)', fontWeight: !editMode ? 600 : 400, transition: 'color 0.2s' }}>View</span>
+                    <div style={{ width: 40, height: 22, borderRadius: 11, background: editMode ? 'var(--accent)' : 'var(--surface2)', border: '1px solid var(--border)', position: 'relative', transition: 'background 0.2s', flexShrink: 0 }}>
+                      <div style={{ position: 'absolute', top: 3, left: editMode ? 20 : 3, width: 14, height: 14, borderRadius: '50%', background: editMode ? '#000' : 'var(--muted)', transition: 'left 0.2s ease, background 0.2s' }} />
+                    </div>
+                    <span style={{ fontSize: 11, color: editMode ? 'var(--text)' : 'var(--muted)', fontWeight: editMode ? 600 : 400, transition: 'color 0.2s' }}>Edit</span>
                   </div>
-                  <span style={{ fontSize: 11, color: editMode ? 'var(--text)' : 'var(--muted)', fontWeight: editMode ? 600 : 400, transition: 'color 0.2s' }}>Edit</span>
                 </div>
-              </div>
+              )
             }>
-              {editMode ? (
+              {/* Always show rendered markdown in view mode */}
+              {(!editMode || readOnly) && (
+                <div className="review-markdown" style={{ minHeight: 80, padding: '12px 14px', background: 'var(--surface2)', borderRadius: 10, border: '1px solid var(--border)' }}>
+                  {(readOnly ? game.review : pendingReview)
+                    ? <ReactMarkdown>{readOnly ? game.review! : pendingReview}</ReactMarkdown>
+                    : <span style={{ color: 'var(--muted)', fontStyle: 'italic' }}>
+                        {readOnly ? 'No review written.' : 'No review yet — toggle Edit to write one.'}
+                      </span>
+                  }
+                </div>
+              )}
+              {/* Edit textarea — only when not readOnly and in edit mode */}
+              {!readOnly && editMode && (
                 <div>
-                  <textarea value={pendingReview} onChange={e => { setPendingReview(e.target.value); setDirty(true) }} placeholder={'Write your review in Markdown...\n\n**Bold**, *italic*, ## Headings, > Blockquotes'} style={{ width: '100%', minHeight: 140, background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 10, color: 'var(--text)', fontSize: 13, padding: '12px 14px', outline: 'none', resize: 'vertical', fontFamily: 'monospace', lineHeight: 1.7, boxSizing: 'border-box', transition: 'border-color 0.15s' }} onFocus={e => (e.target.style.borderColor = 'var(--muted)')} onBlur={e => (e.target.style.borderColor = 'var(--border)')} />
+                  <textarea
+                    value={pendingReview}
+                    onChange={e => { setPendingReview(e.target.value); setDirty(true) }}
+                    placeholder={'Write your review in Markdown...\n\n**Bold**, *italic*, ## Headings, > Blockquotes'}
+                    style={{ width: '100%', minHeight: 140, background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 10, color: 'var(--text)', fontSize: 13, padding: '12px 14px', outline: 'none', resize: 'vertical', fontFamily: 'monospace', lineHeight: 1.7, boxSizing: 'border-box', transition: 'border-color 0.15s' }}
+                    onFocus={e => (e.target.style.borderColor = 'var(--muted)')}
+                    onBlur={e => (e.target.style.borderColor = 'var(--border)')}
+                  />
                   <div style={{ marginTop: 6, display: 'flex', gap: 12, color: 'var(--muted)', fontSize: 11 }}>
                     <span>**bold**</span><span>*italic*</span><span>## heading</span><span>&gt; quote</span><span>- list</span>
                   </div>
                 </div>
-              ) : (
-                <div className="review-markdown" style={{ minHeight: 80, padding: '12px 14px', background: 'var(--surface2)', borderRadius: 10, border: '1px solid var(--border)' }}>
-                  {pendingReview
-                    ? <ReactMarkdown>{pendingReview}</ReactMarkdown>
-                    : <span style={{ color: 'var(--muted)', fontStyle: 'italic' }}>No review yet — toggle Edit to write one.</span>
-                  }
-                </div>
               )}
             </Section>
 
-            {/* Confirm */}
-            <button onClick={confirm} disabled={!dirty} style={{ width: '100%', padding: '12px 20px', borderRadius: 10, border: 'none', background: dirty ? 'var(--accent)' : 'var(--surface2)', color: dirty ? '#000' : 'var(--muted)', fontWeight: 700, fontSize: 14, cursor: dirty ? 'pointer' : 'not-allowed', fontFamily: 'DM Sans, sans-serif', transition: 'all 0.2s', boxShadow: dirty ? '0 4px 20px rgba(232,255,71,0.25)' : 'none' }}>
-              {dirty ? '✓ Confirm Changes' : 'No changes'}
-            </button>
-
-            {/* Move + Remove */}
-            <div style={{ display: 'flex', gap: 10, paddingTop: 4, borderTop: '1px solid var(--border)', flexWrap: 'wrap' }}>
-              {otherLists.map(l => {
-                const s = listStyles[l]
-                return (
-                  <button key={l} onClick={() => { moveToList(game.id, l); close() }} style={{ flex: 1, padding: '11px 16px', borderRadius: 10, border: `1px solid ${s.border}`, background: s.bg, color: s.color, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', transition: 'filter 0.15s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }} onMouseEnter={e => (e.currentTarget.style.filter = 'brightness(1.2)')} onMouseLeave={e => (e.currentTarget.style.filter = 'brightness(1)')}>
-                    Move to {l.charAt(0).toUpperCase() + l.slice(1)}
-                  </button>
-                )
-              })}
-              <button onClick={() => { removeGame(game.id); close() }} style={{ padding: '11px 16px', borderRadius: 10, border: 'none', background: '#3f1a1a', color: '#f87171', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }} onMouseEnter={e => (e.currentTarget.style.background = '#5a2020')} onMouseLeave={e => (e.currentTarget.style.background = '#3f1a1a')}>
-                Remove
+            {/* Confirm — editable only */}
+            {!readOnly && (
+              <button
+                onClick={confirm}
+                disabled={!dirty}
+                style={{ width: '100%', padding: '12px 20px', borderRadius: 10, border: 'none', background: dirty ? 'var(--accent)' : 'var(--surface2)', color: dirty ? '#000' : 'var(--muted)', fontWeight: 700, fontSize: 14, cursor: dirty ? 'pointer' : 'not-allowed', fontFamily: 'DM Sans, sans-serif', transition: 'all 0.2s', boxShadow: dirty ? '0 4px 20px rgba(232,255,71,0.25)' : 'none' }}
+              >
+                {dirty ? '✓ Confirm Changes' : 'No changes'}
               </button>
-            </div>
+            )}
+
+            {/* Move + Remove — editable only */}
+            {!readOnly && (
+              <div style={{ display: 'flex', gap: 10, paddingTop: 4, borderTop: '1px solid var(--border)', flexWrap: 'wrap' }}>
+                {otherLists.map(l => {
+                  const s = listStyles[l]
+                  return (
+                    <button key={l} onClick={() => { moveToList(game.id, l); close() }}
+                      style={{ flex: 1, padding: '11px 16px', borderRadius: 10, border: `1px solid ${s.border}`, background: s.bg, color: s.color, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', transition: 'filter 0.15s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
+                      onMouseEnter={e => (e.currentTarget.style.filter = 'brightness(1.2)')}
+                      onMouseLeave={e => (e.currentTarget.style.filter = 'brightness(1)')}
+                    >
+                      {s.icon} Move to {l.charAt(0).toUpperCase() + l.slice(1)}
+                    </button>
+                  )
+                })}
+                <button onClick={() => { removeGame(game.id); close() }}
+                  style={{ padding: '11px 16px', borderRadius: 10, border: 'none', background: '#3f1a1a', color: '#f87171', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', transition: 'background 0.15s' }}
+                  onMouseEnter={e => (e.currentTarget.style.background = '#5a2020')}
+                  onMouseLeave={e => (e.currentTarget.style.background = '#3f1a1a')}
+                >
+                  🗑 Remove
+                </button>
+              </div>
+            )}
 
           </div>
         </div>

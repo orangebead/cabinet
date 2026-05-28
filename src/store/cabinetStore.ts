@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { supabase } from '../lib/supabase'
 import type { CabinetGame, GameStatus, GameList, RawgGame } from '../types'
 
 export const STATUSES: GameStatus[] = ['unplayed', 'in_progress', 'completed', 'hundred_percent']
@@ -17,76 +18,165 @@ export const STATUS_COLORS: Record<GameStatus, string> = {
   hundred_percent: '#f59e0b',
 }
 
-const mockGames: CabinetGame[] = [
-  { id: 1, rawg_id: 3498, title: 'Red Dead Redemption 2', cover: 'https://media.rawg.io/media/games/511/5118aff5091cb3efec399c808f8c598f.jpg', status: 'completed', list: 'cabinet', rating: 9, review: 'A masterpiece. The world building is unmatched.', added_at: '2024-01-10' },
-  { id: 2, rawg_id: 41494, title: 'Cyberpunk 2077', cover: 'https://media.rawg.io/media/games/26d/26d4437715bee60138dab4a7c8c59c92.jpg', status: 'in_progress', list: 'cabinet', rating: 7, review: null, added_at: '2024-02-14' },
-  { id: 3, rawg_id: 28, title: 'Red Dead Redemption', cover: 'https://media.rawg.io/media/games/b45/b45575f34285f2c4479c9a5f719d972e.jpg', status: 'unplayed', list: 'cabinet', rating: null, review: null, added_at: '2024-03-01' },
-  { id: 4, rawg_id: 13536, title: 'Portal 2', cover: 'https://media.rawg.io/media/games/328/3283617cb7d75d67257fc58339188742.jpg', status: 'hundred_percent', list: 'cabinet', rating: 10, review: 'Perfect game. Nothing else to say.', added_at: '2024-01-20' },
-  { id: 5, rawg_id: 5679, title: 'Skyrim', cover: 'https://media.rawg.io/media/games/7cf/7cfc9220b401b7a300e409e539c9afd5.jpg', status: 'completed', list: 'cabinet', rating: 8, review: null, added_at: '2024-02-05' },
-  { id: 6, rawg_id: 4200, title: 'Stardew Valley', cover: 'https://media.rawg.io/media/games/713/713269608dc8f2f40f5a670a14b2de94.jpg', status: 'in_progress', list: 'cabinet', rating: null, review: null, added_at: '2024-03-10' },
-  { id: 7, rawg_id: 3070, title: 'Fallout 4', cover: 'https://media.rawg.io/media/games/d82/d82990b9c67a0d2d0de8e1362e977ac4.jpg', status: 'unplayed', list: 'backlog', rating: null, review: null, added_at: '2024-03-15' },
-  { id: 8, rawg_id: 12020, title: 'Left 4 Dead 2', cover: 'https://media.rawg.io/media/games/d58/d588947d4286e7b5e0e12e1bea7d9844.jpg', status: 'unplayed', list: 'wishlist', rating: null, review: null, added_at: '2024-03-18' },
-  { id: 9, rawg_id: 4062, title: 'BioShock Infinite', cover: 'https://media.rawg.io/media/games/fc1/fc1307a2774506b5bd65d7e8424664a7.jpg', status: 'unplayed', list: 'wishlist', rating: null, review: null, added_at: '2024-03-20' },
-]
-
-let nextId = 10
-
 interface CabinetState {
   games: CabinetGame[]
   activeList: GameList
   sortBy: 'added_at' | 'rating' | 'title' | 'status'
   filterStatus: GameStatus | 'all'
   searchQuery: string
+  loadingGames: boolean
+
+  fetchGames: (userId: string) => Promise<void>
+  addGame: (game: RawgGame, list: GameList, userId: string) => Promise<boolean>
+  removeGame: (id: string) => Promise<void>
+  updateStatus: (id: string, status: GameStatus) => Promise<void>
+  updateRating: (id: string, rating: number | null) => Promise<void>
+  updateReview: (id: string, review: string | null) => Promise<void>
+  moveToList: (id: string, list: GameList) => Promise<void>
+
   setActiveList: (list: GameList) => void
   setSortBy: (sort: 'added_at' | 'rating' | 'title' | 'status') => void
   setFilterStatus: (status: GameStatus | 'all') => void
   setSearchQuery: (q: string) => void
-  addGame: (game: RawgGame, list?: GameList) => boolean
-  removeGame: (id: number) => void
-  updateStatus: (id: number, status: GameStatus) => void
-  updateRating: (id: number, rating: number | null) => void
-  updateReview: (id: number, review: string | null) => void
-  moveToList: (id: number, list: GameList) => void
+
   getFilteredGames: () => CabinetGame[]
   getStats: () => { total: number; unplayed: number; in_progress: number; completed: number; hundred_percent: number }
 }
 
 export const useCabinetStore = create<CabinetState>((set, get) => ({
-  games: mockGames,
+  games: [],
   activeList: 'cabinet',
   sortBy: 'added_at',
   filterStatus: 'all',
   searchQuery: '',
+  loadingGames: true,
 
+  // ── Fetch ──────────────────────────────────────────────
+  fetchGames: async (userId) => {
+    set({ loadingGames: true })
+    const { data, error } = await supabase
+      .from('cabinet_games')
+      .select('*')
+      .eq('user_id', userId)
+      .order('added_at', { ascending: false })
+
+    if (!error && data) set({ games: data as CabinetGame[] })
+    set({ loadingGames: false })
+  },
+
+  // ── Add ───────────────────────────────────────────────
+  addGame: async (game, list, userId) => {
+    const existing = get().games.find(g => g.rawg_id === game.id)
+    if (existing) return false
+
+    const newGame: Omit<CabinetGame, 'id'> = {
+      user_id: userId,
+      rawg_id: game.id,
+      title: game.name,
+      cover: game.background_image,
+      status: 'unplayed',
+      list,
+      rating: null,
+      review: null,
+      added_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    }
+
+    // Optimistic update with temp id
+    const tempId = `temp-${Date.now()}`
+    set(state => ({ games: [{ ...newGame, id: tempId }, ...state.games] }))
+
+    const { data, error } = await supabase
+      .from('cabinet_games')
+      .insert({ ...newGame })
+      .select()
+      .single()
+
+    if (error) {
+      // Roll back
+      set(state => ({ games: state.games.filter(g => g.id !== tempId) }))
+      return false
+    }
+
+    // Replace temp with real row
+    set(state => ({
+      games: state.games.map(g => g.id === tempId ? data as CabinetGame : g)
+    }))
+    return true
+  },
+
+  // ── Remove ────────────────────────────────────────────
+  removeGame: async (id) => {
+    const prev = get().games
+    set(state => ({ games: state.games.filter(g => g.id !== id) }))
+
+    const { error } = await supabase
+      .from('cabinet_games')
+      .delete()
+      .eq('id', id)
+
+    if (error) set({ games: prev })
+  },
+
+  // ── Update status ─────────────────────────────────────
+  updateStatus: async (id, status) => {
+    const prev = get().games
+    set(state => ({ games: state.games.map(g => g.id === id ? { ...g, status } : g) }))
+
+    const { error } = await supabase
+      .from('cabinet_games')
+      .update({ status, updated_at: new Date().toISOString() })
+      .eq('id', id)
+
+    if (error) set({ games: prev })
+  },
+
+  // ── Update rating ─────────────────────────────────────
+  updateRating: async (id, rating) => {
+    const prev = get().games
+    set(state => ({ games: state.games.map(g => g.id === id ? { ...g, rating } : g) }))
+
+    const { error } = await supabase
+      .from('cabinet_games')
+      .update({ rating, updated_at: new Date().toISOString() })
+      .eq('id', id)
+
+    if (error) set({ games: prev })
+  },
+
+  // ── Update review ─────────────────────────────────────
+  updateReview: async (id, review) => {
+    const prev = get().games
+    set(state => ({ games: state.games.map(g => g.id === id ? { ...g, review } : g) }))
+
+    const { error } = await supabase
+      .from('cabinet_games')
+      .update({ review, updated_at: new Date().toISOString() })
+      .eq('id', id)
+
+    if (error) set({ games: prev })
+  },
+
+  // ── Move to list ──────────────────────────────────────
+  moveToList: async (id, list) => {
+    const prev = get().games
+    set(state => ({ games: state.games.map(g => g.id === id ? { ...g, list } : g) }))
+
+    const { error } = await supabase
+      .from('cabinet_games')
+      .update({ list, updated_at: new Date().toISOString() })
+      .eq('id', id)
+
+    if (error) set({ games: prev })
+  },
+
+  // ── UI state ──────────────────────────────────────────
   setActiveList: (list) => set({ activeList: list, filterStatus: 'all', searchQuery: '' }),
   setSortBy: (sort) => set({ sortBy: sort }),
   setFilterStatus: (status) => set({ filterStatus: status }),
   setSearchQuery: (q) => set({ searchQuery: q }),
 
-  addGame: (game, list = 'cabinet') => {
-    if (get().games.find(g => g.rawg_id === game.id)) return false
-    set((state) => ({
-      games: [...state.games, {
-        id: nextId++,
-        rawg_id: game.id,
-        title: game.name,
-        cover: game.background_image,
-        status: 'unplayed',
-        list,
-        rating: null,
-        review: null,
-        added_at: new Date().toISOString().split('T')[0],
-      }]
-    }))
-    return true
-  },
-
-  removeGame: (id) => set((state) => ({ games: state.games.filter(g => g.id !== id) })),
-  updateStatus: (id, status) => set((state) => ({ games: state.games.map(g => g.id === id ? { ...g, status } : g) })),
-  updateRating: (id, rating) => set((state) => ({ games: state.games.map(g => g.id === id ? { ...g, rating } : g) })),
-  updateReview: (id, review) => set((state) => ({ games: state.games.map(g => g.id === id ? { ...g, review } : g) })),
-  moveToList: (id, list) => set((state) => ({ games: state.games.map(g => g.id === id ? { ...g, list } : g) })),
-
+  // ── Derived ───────────────────────────────────────────
   getFilteredGames: () => {
     const { games, activeList, sortBy, filterStatus, searchQuery } = get()
     let filtered = games.filter(g => g.list === activeList)
