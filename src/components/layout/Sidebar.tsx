@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { useCabinetStore } from '../../store/cabinetStore'
 import { useAuthStore } from '../../store/authStore'
 import { useProfileStore } from '../../store/profileStore'
-import { NotificationBell } from '../notifications/NotificationBell'
+// import { NotificationBell } from '../notifications/NotificationBell'
 import type { GameList } from '../../types'
 import type { Page } from '../../App'
 

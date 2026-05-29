@@ -61,13 +61,13 @@ export function GameCard({ game }: Props) {
   )
 }
 
-function Section({ label, children }: { label: React.ReactNode; children: React.ReactNode }) {
-  return (
-    <div>
-      <div style={{ color: 'var(--muted)', fontSize: 10, letterSpacing: 2, fontWeight: 700, marginBottom: 10 }}>
-        {label}
-      </div>
-      {children}
-    </div>
-  )
-}
+// function Section({ label, children }: { label: React.ReactNode; children: React.ReactNode }) {
+//   return (
+//     <div>
+//       <div style={{ color: 'var(--muted)', fontSize: 10, letterSpacing: 2, fontWeight: 700, marginBottom: 10 }}>
+//         {label}
+//       </div>
+//       {children}
+//     </div>
+//   )
+// }

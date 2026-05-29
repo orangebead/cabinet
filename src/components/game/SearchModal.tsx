@@ -11,7 +11,7 @@ interface Props {
   userId: string        // ← add this
 }
 
-export function SearchModal({ onClose, defaultList = 'cabinet', userId }: Props) {
+export function SearchModal({ onClose, userId }: Props) {
   const [query, setQuery] = useState('')
   const [debouncedQuery, setDebouncedQuery] = useState('')
   const [added, setAdded] = useState<Set<number>>(new Set())

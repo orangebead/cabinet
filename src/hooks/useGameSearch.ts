@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import type { RawgGame } from '../types'
 
-const RAWG_KEY = import.meta.env.RAWG_K
+const RAWG_KEY = import.meta.env.VITE_RAWG_K
 
 const MOCK_RESULTS: RawgGame[] = [
   { id: 3498, name: 'Red Dead Redemption 2', background_image: 'https://media.rawg.io/media/games/511/5118aff5091cb3efec399c808f8c598f.jpg', released: '2018-10-26', metacritic: 97 },

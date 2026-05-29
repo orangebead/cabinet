@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useCabinetStore, STATUS_LABELS, STATUS_COLORS } from '../store/cabinetStore'
+import { useCabinetStore, STATUS_LABELS } from '../store/cabinetStore'
 import { useAuthStore } from '../store/authStore'
 import { GameCard } from '../components/game/GameCard'
 import { ProgressBar } from '../components/game/ProgressBar'

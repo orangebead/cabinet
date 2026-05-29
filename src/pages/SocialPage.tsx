@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useProfileStore } from '../store/profileStore'
 import { useAuthStore } from '../store/authStore'
-import { STATUS_COLORS, STATUS_LABELS } from '../store/cabinetStore'
-import type { Profile, CabinetGame, FeedItem } from '../types'
+import { STATUS_LABELS } from '../store/cabinetStore'
+import type { Profile, FeedItem } from '../types'
 
 interface Props {
   onViewProfile: (username: string) => void

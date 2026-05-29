@@ -66,7 +66,7 @@ export function NotificationBell() {
   )
 }
 
-function NotificationRow({ notification: n, onRead }: { notification: Notification; onRead: () => void }) {
+function NotificationRow({ notification: n }: { notification: Notification; onRead: () => void }) {
   const profile = n.from_profile
   const initial = (profile?.display_name || profile?.username || '?')[0].toUpperCase()
 
