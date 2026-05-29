@@ -2,7 +2,7 @@ import type { GameDetails } from '../types'
 
 const cache = new Map<number, GameDetails>()
 
-const RAWG_KEY = import.meta.env.VITE_RAWG_API_KEY
+const RAWG_KEY = import.meta.env.RAWG_K
 
 export async function fetchGameDetails(rawg_id: number): Promise<GameDetails | null> {
   if (cache.has(rawg_id)) return cache.get(rawg_id)!
