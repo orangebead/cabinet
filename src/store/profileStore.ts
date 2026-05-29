@@ -107,6 +107,12 @@ export const useProfileStore = create<ProfileState>((set) => ({
 
   follow: async (followerId, followingId) => {
     await supabase.from('follows').insert({ follower_id: followerId, following_id: followingId })
+    // create notification for the person being followed
+    await supabase.from('notifications').insert({
+      user_id: followingId,
+      from_user_id: followerId,
+      type: 'follow',
+    })
   },
 
   unfollow: async (followerId, followingId) => {

@@ -1,11 +1,12 @@
 import { useCabinetStore } from '../../store/cabinetStore'
 import { useAuthStore } from '../../store/authStore'
 import { useProfileStore } from '../../store/profileStore'
+import { NotificationBell } from '../notifications/NotificationBell'
 import type { GameList } from '../../types'
 import type { Page } from '../../App'
 
 const lists: { id: GameList; label: string; icon: string }[] = [
-  { id: 'cabinet', label: 'My Cabinet', icon: '🗃️' },
+  { id: 'cabinet', label: 'Cabinet', icon: '🗃️' },
   { id: 'backlog', label: 'Backlog', icon: '📋' },
   { id: 'wishlist', label: 'Wishlist', icon: '✨' },
 ]
@@ -28,7 +29,7 @@ export function Sidebar({ currentPage, onNavigate }: Props) {
 
   const initial = (profile?.display_name || profile?.username || user?.email || '?')[0].toUpperCase()
 
-  const navBtn = (active: boolean) => ({
+  const navBtn = (active: boolean): React.CSSProperties => ({
     width: '100%', display: 'flex', alignItems: 'center', gap: 10,
     padding: '10px 12px', borderRadius: 8, border: 'none',
     background: active ? 'var(--surface2)' : 'transparent',
@@ -36,7 +37,8 @@ export function Sidebar({ currentPage, onNavigate }: Props) {
     cursor: 'pointer', marginBottom: 2, transition: 'all 0.15s',
     borderLeft: active ? '2px solid var(--accent)' : '2px solid transparent',
     fontFamily: 'DM Sans, sans-serif', fontSize: 14, fontWeight: active ? 600 : 400,
-  } as React.CSSProperties)
+    textAlign: 'left',
+  })
 
   return (
     <aside style={{ position: 'fixed', top: 0, left: 0, width: 220, height: '100vh', background: 'var(--surface)', borderRight: '1px solid var(--border)', display: 'flex', flexDirection: 'column', zIndex: 50, overflow: 'hidden' }}>
@@ -46,15 +48,10 @@ export function Sidebar({ currentPage, onNavigate }: Props) {
         <div style={{ color: 'var(--muted)', fontSize: 11, marginTop: 4, letterSpacing: 1 }}>YOUR GAME SHELF</div>
       </div>
 
-      <nav style={{ padding: '16px 12px', flex: 1, overflowY: 'auto' }}>
-        {/* My lists */}
+      <nav style={{ padding: '16px 12px', flex: 1 }}>
         <div style={{ color: 'var(--muted)', fontSize: 10, fontWeight: 700, letterSpacing: 1.5, padding: '0 12px', marginBottom: 6 }}>MY LISTS</div>
         {lists.map(list => (
-          <button
-            key={list.id}
-            onClick={() => { setActiveList(list.id); onNavigate({ id: 'cabinet' }) }}
-            style={{ ...navBtn(currentPage === 'cabinet' && activeList === list.id), justifyContent: 'space-between' }}
-          >
+          <button key={list.id} onClick={() => { setActiveList(list.id); onNavigate({ id: 'cabinet' }) }} style={{ ...navBtn(currentPage === 'cabinet' && activeList === list.id), justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <span style={{ fontSize: 16 }}>{list.icon}</span>
               <span>{list.label}</span>
@@ -63,41 +60,33 @@ export function Sidebar({ currentPage, onNavigate }: Props) {
           </button>
         ))}
 
-        {/* Social */}
         <div style={{ color: 'var(--muted)', fontSize: 10, fontWeight: 700, letterSpacing: 1.5, padding: '12px 12px 6px', marginTop: 8 }}>SOCIAL</div>
-        <button onClick={() => onNavigate({ id: 'profile' })} style={navBtn(currentPage === 'profile')}>
-          <span style={{ fontSize: 16 }}>👤</span>
-          <span>Profile</span>
+        <button onClick={() => onNavigate({ id: 'profile' })} style={navBtn(currentPage === 'profile' || currentPage === 'view-profile')}>
+          <span style={{ fontSize: 16 }}>👤</span><span>Profile</span>
         </button>
-        <button onClick={() => onNavigate({ id: 'friends' })} style={navBtn(currentPage === 'friends')}>
-          <span style={{ fontSize: 16 }}>👥</span>
-          <span>Friends</span>
+        <button onClick={() => onNavigate({ id: 'social' })} style={navBtn(currentPage === 'social' || currentPage === 'view-cabinet')}>
+          <span style={{ fontSize: 16 }}>📡</span><span>Social</span>
         </button>
       </nav>
 
-      {/* User */}
+      {/* User + notification bell */}
       <div style={{ padding: '16px', borderTop: '1px solid var(--border)', flexShrink: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
           <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700, color: '#000', flexShrink: 0 }}>
             {initial}
           </div>
-          <div style={{ minWidth: 0 }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ color: 'var(--text)', fontWeight: 600, fontSize: 13, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {profile?.display_name || `@${profile?.username}`}
             </div>
-            <div style={{ color: 'var(--muted)', fontSize: 11, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              {user?.email}
-            </div>
+            <div style={{ color: 'var(--muted)', fontSize: 11, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user?.email}</div>
           </div>
+          {/* <NotificationBell /> */}
         </div>
-        <button
-          onClick={signOut}
-          style={{ width: '100%', padding: '8px 0', borderRadius: 8, border: '1px solid var(--border)', background: 'transparent', color: 'var(--muted)', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', transition: 'all 0.15s' }}
+        <button onClick={signOut} style={{ width: '100%', padding: '8px 0', borderRadius: 8, border: '1px solid var(--border)', background: 'transparent', color: 'var(--muted)', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', transition: 'all 0.15s' }}
           onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface2)'; e.currentTarget.style.color = 'var(--text)' }}
           onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--muted)' }}
-        >
-          Sign out
-        </button>
+        >Sign out</button>
       </div>
     </aside>
   )

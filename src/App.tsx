@@ -3,18 +3,19 @@ import { supabase } from './lib/supabase'
 import { useAuthStore } from './store/authStore'
 import { useCabinetStore } from './store/cabinetStore'
 import { useProfileStore } from './store/profileStore'
+import { useRealtimeNotifications } from './hooks/useRealTimeNotifications'
 import { Sidebar } from './components/layout/Sidebar'
 import { CabinetPage } from './pages/CabinetPage'
 import { AuthPage } from './pages/AuthPage'
 import { ProfileSetupPage } from './pages/ProfileSetupPage'
 import { ProfilePage } from './pages/ProfilePage'
-import { FriendsPage } from './pages/FriendsPage'
+import { SocialPage } from './pages/SocialPage'
 import { FriendCabinetPage } from './pages/FriendCabinetPage'
 
 export type Page =
   | { id: 'cabinet' }
   | { id: 'profile' }
-  | { id: 'friends' }
+  | { id: 'social' }
   | { id: 'view-profile'; username: string }
   | { id: 'view-cabinet'; userId: string; username: string }
 
@@ -23,6 +24,9 @@ function App() {
   const fetchGames = useCabinetStore(s => s.fetchGames)
   const { profile, loadingProfile, fetchProfile } = useProfileStore()
   const [page, setPage] = useState<Page>({ id: 'cabinet' })
+
+  // realtime notifications — fires once user is known
+  useRealtimeNotifications(user?.id)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -47,23 +51,17 @@ function App() {
     return () => subscription.unsubscribe()
   }, [])
 
-  if (loading || loadingProfile) {
-    return (
-      <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ fontFamily: 'Bebas Neue', fontSize: 32, letterSpacing: 4, color: 'var(--accent)', opacity: 0.5 }}>CABINET</div>
-      </div>
-    )
-  }
-
+  if (loading) return <Splash />
   if (!user) return <AuthPage />
+  if (loadingProfile) return <Splash />
   if (!profile) return <ProfileSetupPage userId={user.id} />
 
   const renderPage = () => {
     switch (page.id) {
       case 'cabinet': return <CabinetPage />
       case 'profile': return <ProfilePage onViewCabinet={(userId, username) => setPage({ id: 'view-cabinet', userId, username })} />
-      case 'friends': return (
-        <FriendsPage
+      case 'social': return (
+        <SocialPage
           onViewProfile={username => setPage({ id: 'view-profile', username })}
           onViewCabinet={(userId, username) => setPage({ id: 'view-cabinet', userId, username })}
         />
@@ -78,7 +76,7 @@ function App() {
         <FriendCabinetPage
           userId={page.userId}
           username={page.username}
-          onBack={() => setPage({ id: 'friends' })}
+          onBack={() => setPage({ id: 'social' })}
         />
       )
     }
@@ -90,6 +88,14 @@ function App() {
       <div style={{ marginLeft: 220, flex: 1, minWidth: 0 }}>
         {renderPage()}
       </div>
+    </div>
+  )
+}
+
+function Splash() {
+  return (
+    <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ fontFamily: 'Bebas Neue', fontSize: 32, letterSpacing: 4, color: 'var(--accent)', opacity: 0.5 }}>CABINET</div>
     </div>
   )
 }

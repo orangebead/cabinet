@@ -42,3 +42,26 @@ export interface Follow {
   following_id: string
   created_at: string
 }
+
+export type NotificationType = 'follow' | 'game_added' | 'review_written'
+
+export interface Notification {
+  id: string
+  user_id: string
+  from_user_id: string
+  type: NotificationType
+  read: boolean
+  created_at: string
+  from_profile?: Profile
+}
+
+export interface FeedItem {
+  id: string
+  user_id: string
+  profile: Profile
+  type: 'game_added' | 'status_changed' | 'review_written' | 'rating_given'
+  game_title: string
+  game_cover: string | null
+  meta: string // e.g. "marked as Completed" or "gave it 8/10"
+  created_at: string
+}
