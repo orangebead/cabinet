@@ -217,7 +217,7 @@ export function GameModal({ game, onClose, readOnly = false }: { game: CabinetGa
                       onMouseEnter={e => (e.currentTarget.style.filter = 'brightness(1.2)')}
                       onMouseLeave={e => (e.currentTarget.style.filter = 'brightness(1)')}
                     >
-                      {s.icon} Move to {l.charAt(0).toUpperCase() + l.slice(1)}
+                      Move to {l.charAt(0).toUpperCase() + l.slice(1)}
                     </button>
                   )
                 })}
@@ -226,7 +226,7 @@ export function GameModal({ game, onClose, readOnly = false }: { game: CabinetGa
                   onMouseEnter={e => (e.currentTarget.style.background = '#5a2020')}
                   onMouseLeave={e => (e.currentTarget.style.background = '#3f1a1a')}
                 >
-                  🗑 Remove
+                  Remove
                 </button>
               </div>
             )}
