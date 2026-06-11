@@ -1,17 +1,23 @@
 import { useState, useEffect } from 'react'
 import { useProfileStore } from '../store/profileStore'
 import { useAuthStore } from '../store/authStore'
+import { useIsMobile } from '../hooks/useIsMobile'
 import { STATUS_COLORS, STATUS_LABELS } from '../store/cabinetStore'
 import type { Profile, CabinetGame, GameStatus } from '../types'
 
 interface Props {
-  username?: string // if undefined, show own profile
+  username?: string
   onViewCabinet?: (userId: string, username: string) => void
 }
 
 export function ProfilePage({ username, onViewCabinet }: Props) {
   const { user } = useAuthStore()
-  const { profile: ownProfile, getProfileByUsername, getProfileGames, getFollowerCount, getFollowingCount, isFollowing, follow, unfollow, updateProfile, getFollowing } = useProfileStore()
+  const {
+    profile: ownProfile, getProfileByUsername, getProfileGames,
+    getFollowerCount, getFollowingCount, isFollowing, follow, unfollow,
+    updateProfile, getFollowing,
+  } = useProfileStore()
+  const isMobile = useIsMobile()
 
   const [profile, setProfile] = useState<Profile | null>(null)
   const [games, setGames] = useState<CabinetGame[]>([])
@@ -26,9 +32,7 @@ export function ProfilePage({ username, onViewCabinet }: Props) {
 
   const isOwn = !username || username === ownProfile?.username
 
-  useEffect(() => {
-    load()
-  }, [username, ownProfile])
+  useEffect(() => { load() }, [username, ownProfile])
 
   const load = async () => {
     setLoading(true)
@@ -38,14 +42,14 @@ export function ProfilePage({ username, onViewCabinet }: Props) {
     setProfile(p)
     setBioText(p.bio ?? '')
 
-    const [games, followers, followingCnt, followingL] = await Promise.all([
+    const [g, followers, followingCnt, followingL] = await Promise.all([
       getProfileGames(p.id),
       getFollowerCount(p.id),
       getFollowingCount(p.id),
       isOwn ? getFollowing(p.id) : Promise.resolve([]),
     ])
 
-    setGames(games)
+    setGames(g)
     setFollowerCount(followers)
     setFollowingCount(followingCnt)
     setFollowingList(followingL)
@@ -73,27 +77,25 @@ export function ProfilePage({ username, onViewCabinet }: Props) {
   const saveBio = async () => {
     if (!user) return
     await updateProfile(user.id, { bio: bioText || null })
+    setProfile(p => p ? { ...p, bio: bioText || null } : p)
     setEditingBio(false)
   }
 
-  if (loading) {
-    return (
-      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--muted)' }}>
-        <div style={{ fontFamily: 'Bebas Neue', fontSize: 24, letterSpacing: 3, opacity: 0.4 }}>Loading...</div>
-      </div>
-    )
-  }
+  if (loading) return (
+    <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
+      <div style={{ width: 28, height: 28, borderRadius: '50%', border: '2px solid var(--border)', borderTop: '2px solid var(--accent)', animation: 'spin 0.8s linear infinite' }} />
+      <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
+    </div>
+  )
 
-  if (!profile) {
-    return (
-      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ textAlign: 'center', color: 'var(--muted)' }}>
-          <div style={{ fontSize: 48, marginBottom: 16 }}>👤</div>
-          <div style={{ fontSize: 16 }}>Profile not found</div>
-        </div>
+  if (!profile) return (
+    <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', color: 'var(--muted)' }}>
+      <div style={{ textAlign: 'center' }}>
+        <div style={{ fontSize: 40, marginBottom: 12 }}>👤</div>
+        <div>Profile not found</div>
       </div>
-    )
-  }
+    </div>
+  )
 
   const cabinetGames = games.filter(g => g.list === 'cabinet')
   const total = cabinetGames.length
@@ -106,157 +108,184 @@ export function ProfilePage({ username, onViewCabinet }: Props) {
   })()
 
   const initial = (profile.display_name || profile.username)[0].toUpperCase()
+  const pad = isMobile ? '20px 16px' : '32px 40px'
 
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      {/* Header */}
-      <div style={{ padding: '40px 40px 32px', borderBottom: '1px solid var(--border)' }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 24, maxWidth: 800 }}>
-          {/* Avatar */}
-          <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Bebas Neue', fontSize: 32, color: '#000', flexShrink: 0 }}>
-            {initial}
-          </div>
 
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
-              <h1 style={{ margin: 0, fontFamily: 'Bebas Neue', fontSize: 36, letterSpacing: 1.5, lineHeight: 1 }}>
-                {profile.display_name || profile.username}
-              </h1>
-              <span style={{ color: 'var(--muted)', fontSize: 14 }}>@{profile.username}</span>
-              {!profile.is_public && (
-                <span style={{ background: 'var(--surface2)', border: '1px solid var(--border)', color: 'var(--muted)', fontSize: 11, padding: '2px 8px', borderRadius: 4, fontWeight: 600 }}>Private</span>
-              )}
+      {/* ── Profile card ───────────────────────────────────── */}
+      <div style={{ padding: pad, borderBottom: '1px solid var(--border)' }}>
+        <div style={{ maxWidth: 600 }}>
+
+          {/* Top: avatar + name + actions */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 16 }}>
+            {/* Avatar */}
+            <div style={{ width: isMobile ? 56 : 68, height: isMobile ? 56 : 68, borderRadius: '50%', background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Bebas Neue', fontSize: isMobile ? 26 : 32, color: '#000', flexShrink: 0 }}>
+              {initial}
             </div>
 
-            {/* Bio */}
-            <div style={{ marginTop: 10 }}>
-              {isOwn && editingBio ? (
-                <div>
-                  <textarea
-                    value={bioText}
-                    onChange={e => setBioText(e.target.value)}
-                    placeholder="Write something about yourself..."
-                    maxLength={160}
-                    style={{ width: '100%', maxWidth: 500, padding: '8px 12px', background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text)', fontSize: 13, outline: 'none', resize: 'none', fontFamily: 'DM Sans, sans-serif', boxSizing: 'border-box' }}
-                    rows={2}
-                    onFocus={e => (e.target.style.borderColor = 'var(--muted)')}
-                    onBlur={e => (e.target.style.borderColor = 'var(--border)')}
-                  />
-                  <div style={{ display: 'flex', gap: 8, marginTop: 6 }}>
-                    <SmallBtn label="Save" accent onClick={saveBio} />
-                    <SmallBtn label="Cancel" onClick={() => setEditingBio(false)} />
-                  </div>
-                </div>
-              ) : (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <p style={{ margin: 0, color: profile.bio ? 'var(--text)' : 'var(--muted)', fontSize: 13, fontStyle: profile.bio ? 'normal' : 'italic' }}>
-                    {profile.bio ?? (isOwn ? 'No bio yet.' : '')}
-                  </p>
-                  {isOwn && <SmallBtn label="Edit bio" onClick={() => setEditingBio(true)} />}
-                </div>
-              )}
+            {/* Name + username */}
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                <h1 style={{ margin: 0, fontFamily: 'Bebas Neue', fontSize: isMobile ? 26 : 30, letterSpacing: 1, lineHeight: 1 }}>
+                  {profile.display_name || profile.username}
+                </h1>
+                {!profile.is_public && (
+                  <span style={{ background: 'var(--surface2)', border: '1px solid var(--border)', color: 'var(--muted)', fontSize: 10, padding: '2px 7px', borderRadius: 4, fontWeight: 600, flexShrink: 0 }}>Private</span>
+                )}
+              </div>
+              <div style={{ color: 'var(--muted)', fontSize: 13, marginTop: 2 }}>@{profile.username}</div>
             </div>
 
-            {/* Stats row */}
-            <div style={{ display: 'flex', gap: 24, marginTop: 16, flexWrap: 'wrap' }}>
-              <Stat label="Games" value={total} />
-              <Stat label="Completed" value={`${completionPct}%`} />
-              {avgRating && <Stat label="Avg Rating" value={avgRating} accent />}
-              <Stat label="Followers" value={followerCount} />
-              <Stat label="Following" value={followingCount} />
-            </div>
-          </div>
-
-          {/* Actions */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flexShrink: 0 }}>
+            {/* Follow button — other profiles only */}
             {!isOwn && user && (
               <button
                 onClick={handleFollow}
-                style={{ padding: '9px 20px', borderRadius: 9, border: following ? '1px solid var(--border)' : 'none', background: following ? 'transparent' : 'var(--accent)', color: following ? 'var(--muted)' : '#000', fontWeight: 700, fontSize: 13, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', transition: 'all 0.15s', minWidth: 100 }}
-                onMouseEnter={e => { if (following) { e.currentTarget.style.borderColor = '#f87171'; e.currentTarget.style.color = '#f87171' } }}
-                onMouseLeave={e => { if (following) { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--muted)' } }}
+                style={{ padding: '8px 18px', borderRadius: 8, border: following ? '1px solid var(--border)' : 'none', background: following ? 'transparent' : 'var(--accent)', color: following ? 'var(--muted)' : '#000', fontWeight: 700, fontSize: 13, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', transition: 'all 0.15s', flexShrink: 0 }}
+                onMouseEnter={e => { if (following) { e.currentTarget.style.color = '#f87171'; e.currentTarget.style.borderColor = '#f87171' } }}
+                onMouseLeave={e => { if (following) { e.currentTarget.style.color = 'var(--muted)'; e.currentTarget.style.borderColor = 'var(--border)' } }}
               >
                 {following ? 'Unfollow' : 'Follow'}
               </button>
             )}
-            {!isOwn && onViewCabinet && (
-              <button
-                onClick={() => onViewCabinet(profile.id, profile.username)}
-                style={{ padding: '9px 20px', borderRadius: 9, border: '1px solid var(--border)', background: 'transparent', color: 'var(--text)', fontWeight: 600, fontSize: 13, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', transition: 'all 0.15s' }}
-                onMouseEnter={e => (e.currentTarget.style.background = 'var(--surface2)')}
-                onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-              >
-                View Cabinet
-              </button>
-            )}
-            {isOwn && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <span style={{ color: 'var(--muted)', fontSize: 12 }}>Public profile</span>
-                <div
-                  onClick={() => user && updateProfile(user.id, { is_public: !profile.is_public }).then(() => setProfile(p => p ? { ...p, is_public: !p.is_public } : p))}
-                  style={{ width: 36, height: 20, borderRadius: 10, background: profile.is_public ? 'var(--accent)' : 'var(--surface2)', border: '1px solid var(--border)', position: 'relative', cursor: 'pointer', transition: 'background 0.2s', flexShrink: 0 }}
-                >
-                  <div style={{ position: 'absolute', top: 2, left: profile.is_public ? 17 : 2, width: 14, height: 14, borderRadius: '50%', background: profile.is_public ? '#000' : 'var(--muted)', transition: 'left 0.2s' }} />
+          </div>
+
+          {/* Bio */}
+          <div style={{ marginBottom: 16 }}>
+            {isOwn && editingBio ? (
+              <div>
+                <textarea
+                  value={bioText}
+                  onChange={e => setBioText(e.target.value)}
+                  placeholder="Write something about yourself..."
+                  maxLength={160}
+                  rows={2}
+                  style={{ width: '100%', padding: '9px 12px', background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text)', fontSize: 13, outline: 'none', resize: 'none', fontFamily: 'DM Sans, sans-serif', boxSizing: 'border-box' }}
+                  onFocus={e => (e.target.style.borderColor = 'var(--muted)')}
+                  onBlur={e => (e.target.style.borderColor = 'var(--border)')}
+                />
+                <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                  <SmBtn label="Save" accent onClick={saveBio} />
+                  <SmBtn label="Cancel" onClick={() => { setEditingBio(false); setBioText(profile.bio ?? '') }} />
                 </div>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                <p style={{ margin: 0, color: profile.bio ? 'var(--text)' : 'var(--muted)', fontSize: 13, fontStyle: profile.bio ? 'normal' : 'italic', lineHeight: 1.5, flex: 1 }}>
+                  {profile.bio ?? (isOwn ? 'No bio yet.' : '')}
+                </p>
+                {isOwn && <SmBtn label="Edit" onClick={() => setEditingBio(true)} />}
               </div>
             )}
           </div>
+
+          {/* Stats row */}
+          <div style={{ display: 'flex', gap: 0, background: 'var(--surface2)', borderRadius: 10, border: '1px solid var(--border)', overflow: 'hidden' }}>
+            {[
+              { label: 'Games', value: total },
+              { label: 'Done', value: `${completionPct}%` },
+              ...(avgRating ? [{ label: 'Avg', value: avgRating, accent: true }] : []),
+              { label: 'Followers', value: followerCount },
+              { label: 'Following', value: followingCount },
+            ].map((s, i, arr) => (
+              <div key={s.label} style={{ flex: 1, padding: '12px 8px', textAlign: 'center', borderRight: i < arr.length - 1 ? '1px solid var(--border)' : 'none' }}>
+                <div style={{ fontFamily: 'Bebas Neue', fontSize: 20, letterSpacing: 1, color: s.accent ? 'var(--accent)' : 'var(--text)', lineHeight: 1 }}>{s.value}</div>
+                <div style={{ color: 'var(--muted)', fontSize: 10, marginTop: 3, fontWeight: 600, letterSpacing: 0.5 }}>{s.label}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Own profile controls */}
+          {isOwn && (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 14 }}>
+              <span style={{ color: 'var(--muted)', fontSize: 12 }}>Public profile</span>
+              <div
+                onClick={() => user && updateProfile(user.id, { is_public: !profile.is_public }).then(() => setProfile(p => p ? { ...p, is_public: !p.is_public } : p))}
+                style={{ width: 36, height: 20, borderRadius: 10, background: profile.is_public ? 'var(--accent)' : 'var(--surface2)', border: '1px solid var(--border)', position: 'relative', cursor: 'pointer', transition: 'background 0.2s' }}
+              >
+                <div style={{ position: 'absolute', top: 2, left: profile.is_public ? 17 : 2, width: 14, height: 14, borderRadius: '50%', background: profile.is_public ? '#000' : 'var(--muted)', transition: 'left 0.2s' }} />
+              </div>
+            </div>
+          )}
+
+          {/* View cabinet button — other profiles */}
+          {!isOwn && profile.is_public && onViewCabinet && (
+            <button
+              onClick={() => onViewCabinet(profile.id, profile.username)}
+              style={{ marginTop: 14, width: '100%', padding: '10px', borderRadius: 9, border: '1px solid var(--border)', background: 'transparent', color: 'var(--text)', fontWeight: 600, fontSize: 13, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', transition: 'background 0.15s' }}
+              onMouseEnter={e => (e.currentTarget.style.background = 'var(--surface2)')}
+              onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+            >
+              View Cabinet →
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Tabs */}
-      <div style={{ padding: '0 40px', borderBottom: '1px solid var(--border)', display: 'flex', gap: 0 }}>
-        {(['games', 'following'] as const).map(tab => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            style={{ padding: '14px 20px', border: 'none', background: 'transparent', color: activeTab === tab ? 'var(--text)' : 'var(--muted)', fontWeight: activeTab === tab ? 600 : 400, fontSize: 13, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', borderBottom: activeTab === tab ? '2px solid var(--accent)' : '2px solid transparent', transition: 'all 0.15s', textTransform: 'capitalize' }}
-          >
-            {tab === 'games' ? `Games (${total})` : `Following (${followingCount})`}
-          </button>
-        ))}
+      {/* ── Tabs ───────────────────────────────────────────── */}
+      <div style={{ padding: '0 16px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'center' }}>
+        <div style={{ display: 'flex', gap: 0, width: '100%', maxWidth: 400 }}>
+          {(['games', 'following'] as const).map(tab => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              style={{
+                flex: 1, padding: '14px 0', border: 'none', background: 'transparent',
+                color: activeTab === tab ? 'var(--text)' : 'var(--muted)',
+                fontWeight: activeTab === tab ? 700 : 400,
+                fontSize: 13, cursor: 'pointer',
+                fontFamily: 'DM Sans, sans-serif',
+                borderBottom: activeTab === tab ? '2px solid var(--accent)' : '2px solid transparent',
+                transition: 'all 0.15s',
+              }}
+            >
+              {tab === 'games' ? `Games (${total})` : `Following (${followingCount})`}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* Tab content */}
-      <div style={{ padding: '28px 40px', flex: 1 }}>
+      {/* ── Tab content ────────────────────────────────────── */}
+      <div style={{ padding: pad, flex: 1 }}>
+
+        {/* Games tab */}
         {activeTab === 'games' && (
           <>
-            {/* Status breakdown */}
+            {/* Status chips */}
             {total > 0 && (
-              <div style={{ display: 'flex', gap: 10, marginBottom: 24, flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
                 {(['unplayed', 'in_progress', 'completed', 'hundred_percent'] as GameStatus[]).map(s => {
                   const count = cabinetGames.filter(g => g.status === s).length
                   if (!count) return null
                   return (
-                    <div key={s} style={{ display: 'flex', alignItems: 'center', gap: 7, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 14px' }}>
-                      <div style={{ width: 8, height: 8, borderRadius: 2, background: STATUS_COLORS[s] }} />
-                      <span style={{ color: 'var(--muted)', fontSize: 12 }}>{STATUS_LABELS[s]}</span>
-                      <span style={{ fontWeight: 700, fontSize: 13 }}>{count}</span>
+                    <div key={s} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, padding: '6px 12px' }}>
+                      <div style={{ width: 7, height: 7, borderRadius: 2, background: STATUS_COLORS[s], flexShrink: 0 }} />
+                      <span style={{ color: 'var(--muted)', fontSize: 11 }}>{STATUS_LABELS[s]}</span>
+                      <span style={{ fontWeight: 700, fontSize: 12 }}>{count}</span>
                     </div>
                   )
                 })}
               </div>
             )}
 
-            {/* Recent games grid */}
             {total === 0 ? (
               <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--muted)' }}>
-                <div style={{ fontSize: 40, marginBottom: 12 }}>🎮</div>
-                <div>{isOwn ? 'Your cabinet is empty.' : 'No games yet.'}</div>
+                <div style={{ fontSize: 36, marginBottom: 10 }}>🎮</div>
+                <div style={{ fontSize: 14 }}>{isOwn ? 'Your cabinet is empty.' : 'No games yet.'}</div>
               </div>
             ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: 10 }}>
-                {cabinetGames.slice(0, 18).map(game => (
-                  <div key={game.id} style={{ position: 'relative', borderRadius: 8, overflow: 'hidden', border: '1px solid var(--border)' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: 8 }}>
+                {cabinetGames.map(game => (
+                  <div key={game.id} style={{ position: 'relative', borderRadius: 8, overflow: 'hidden', border: '1px solid var(--border)', aspectRatio: '3/4' }}>
                     {game.cover
-                      ? <img src={game.cover} alt={game.title} style={{ width: '100%', aspectRatio: '3/4', objectFit: 'cover', display: 'block' }} />
-                      : <div style={{ width: '100%', aspectRatio: '3/4', background: 'var(--surface2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24 }}>🎮</div>
+                      ? <img src={game.cover} alt={game.title} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                      : <div style={{ width: '100%', height: '100%', background: 'var(--surface2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>🎮</div>
                     }
-                    <div style={{ position: 'absolute', top: 5, left: 5, background: STATUS_COLORS[game.status], color: game.status === 'unplayed' ? '#fff' : '#000', fontSize: 9, fontWeight: 700, padding: '2px 6px', borderRadius: 3 }}>
+                    <div style={{ position: 'absolute', top: 5, left: 5, background: STATUS_COLORS[game.status], color: game.status === 'unplayed' ? '#fff' : '#000', fontSize: 8, fontWeight: 700, padding: '2px 5px', borderRadius: 3 }}>
                       {STATUS_LABELS[game.status]}
                     </div>
                     {game.rating && (
-                      <div style={{ position: 'absolute', top: 5, right: 5, background: 'rgba(0,0,0,0.8)', color: 'var(--accent)', fontSize: 11, fontWeight: 700, padding: '2px 6px', borderRadius: 3, fontFamily: 'Bebas Neue' }}>
+                      <div style={{ position: 'absolute', top: 5, right: 5, background: 'rgba(0,0,0,0.8)', color: 'var(--accent)', fontSize: 10, fontWeight: 700, padding: '2px 5px', borderRadius: 3, fontFamily: 'Bebas Neue' }}>
                         {game.rating}
                       </div>
                     )}
@@ -267,17 +296,32 @@ export function ProfilePage({ username, onViewCabinet }: Props) {
           </>
         )}
 
+        {/* Following tab */}
         {activeTab === 'following' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, maxWidth: 500 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxWidth: 500 }}>
             {followingList.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--muted)' }}>
-                <div style={{ fontSize: 40, marginBottom: 12 }}>👥</div>
-                <div>{isOwn ? "You're not following anyone yet." : 'Not following anyone.'}</div>
+                <div style={{ fontSize: 36, marginBottom: 10 }}>👥</div>
+                <div style={{ fontSize: 14 }}>{isOwn ? "You're not following anyone yet." : 'Not following anyone.'}</div>
               </div>
             ) : (
-              followingList.map(p => (
-                <FollowCard key={p.id} profile={p} onViewCabinet={onViewCabinet} />
-              ))
+              followingList.map(p => {
+                const init = (p.display_name || p.username)[0].toUpperCase()
+                return (
+                  <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10 }}>
+                    <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Bebas Neue', fontSize: 16, color: '#000', flexShrink: 0 }}>
+                      {init}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 600, fontSize: 13, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.display_name || p.username}</div>
+                      <div style={{ color: 'var(--muted)', fontSize: 11 }}>@{p.username}</div>
+                    </div>
+                    {p.is_public && onViewCabinet && (
+                      <SmBtn label="Cabinet" onClick={() => onViewCabinet(p.id, p.username)} />
+                    )}
+                  </div>
+                )
+              })
             )}
           </div>
         )}
@@ -286,38 +330,13 @@ export function ProfilePage({ username, onViewCabinet }: Props) {
   )
 }
 
-function FollowCard({ profile, onViewCabinet }: { profile: Profile; onViewCabinet?: (userId: string, username: string) => void }) {
-  const initial = (profile.display_name || profile.username)[0].toUpperCase()
+function SmBtn({ label, onClick, accent }: { label: string; onClick: () => void; accent?: boolean }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 18px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12 }}>
-      <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Bebas Neue', fontSize: 18, color: '#000', flexShrink: 0 }}>
-        {initial}
-      </div>
-      <div style={{ flex: 1 }}>
-        <div style={{ fontWeight: 600, fontSize: 14 }}>{profile.display_name || profile.username}</div>
-        <div style={{ color: 'var(--muted)', fontSize: 12 }}>@{profile.username}</div>
-      </div>
-      {onViewCabinet && (
-        <SmallBtn label="View Cabinet" onClick={() => onViewCabinet(profile.id, profile.username)} />
-      )}
-    </div>
-  )
-}
-
-function Stat({ label, value, accent }: { label: string; value: string | number; accent?: boolean }) {
-  return (
-    <div>
-      <div style={{ fontFamily: 'Bebas Neue', fontSize: 22, letterSpacing: 1, color: accent ? 'var(--accent)' : 'var(--text)', lineHeight: 1 }}>{value}</div>
-      <div style={{ color: 'var(--muted)', fontSize: 11, marginTop: 2 }}>{label}</div>
-    </div>
-  )
-}
-
-function SmallBtn({ label, onClick, accent }: { label: string; onClick: () => void; accent?: boolean }) {
-  return (
-    <button onClick={onClick} style={{ padding: '6px 12px', borderRadius: 7, border: accent ? 'none' : '1px solid var(--border)', background: accent ? 'var(--accent)' : 'transparent', color: accent ? '#000' : 'var(--muted)', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', transition: 'all 0.15s' }}
-      onMouseEnter={e => { if (!accent) e.currentTarget.style.background = 'var(--surface2)' }}
-      onMouseLeave={e => { if (!accent) e.currentTarget.style.background = 'transparent' }}
+    <button
+      onClick={onClick}
+      style={{ padding: '6px 12px', borderRadius: 7, border: accent ? 'none' : '1px solid var(--border)', background: accent ? 'var(--accent)' : 'transparent', color: accent ? '#000' : 'var(--muted)', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', transition: 'all 0.15s', flexShrink: 0 }}
+      onMouseEnter={e => { if (!accent) { e.currentTarget.style.background = 'var(--surface2)'; e.currentTarget.style.color = 'var(--text)' } }}
+      onMouseLeave={e => { if (!accent) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--muted)' } }}
     >
       {label}
     </button>
