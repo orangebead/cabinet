@@ -2,16 +2,18 @@ import { useState, useRef, useEffect } from 'react'
 import { useGameSearch } from '../../hooks/useGameSearch'
 import { useCabinetStore } from '../../store/cabinetStore'
 import type { GameList, RawgGame } from '../../types'
+import { useIsMobile } from '../../hooks/useIsMobile';
 
 interface Props { onClose: () => void; defaultList?: GameList }
 
 interface Props {
   onClose: () => void
   defaultList?: GameList
-  userId: string        // ← add this
+  userId: string
 }
 
 export function SearchModal({ onClose, userId }: Props) {
+  const isMobile = useIsMobile()
   const [query, setQuery] = useState('')
   const [debouncedQuery, setDebouncedQuery] = useState('')
   const [added, setAdded] = useState<Set<number>>(new Set())
@@ -56,8 +58,10 @@ export function SearchModal({ onClose, userId }: Props) {
       onClick={close}
       style={{
         position: 'fixed', inset: 0, zIndex: 200,
-        display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
-        paddingTop: '10vh',
+        display: 'flex',
+        alignItems: isMobile ? 'flex-end' : 'flex-start',
+        justifyContent: 'center',
+        paddingTop: isMobile ? 0 : '10vh',
         background: mounted ? 'rgba(0,0,0,0.75)' : 'rgba(0,0,0,0)',
         backdropFilter: mounted ? 'blur(6px)' : 'blur(0px)',
         transition: 'background 0.22s ease, backdrop-filter 0.22s ease',
@@ -68,17 +72,19 @@ export function SearchModal({ onClose, userId }: Props) {
         style={{
           background: 'var(--surface)',
           border: '1px solid var(--border)',
-          borderRadius: 16,
+          borderRadius: isMobile ? '20px 20px 0 0' : 16,
           width: '100%',
-          maxWidth: 580,
-          maxHeight: '70vh',
-          display: 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden',
+          maxWidth: isMobile ? '100%' : 580,
+          maxHeight: isMobile ? '85vh' : '70vh',
+          display: 'flex', flexDirection: 'column', overflow: 'hidden',
           boxShadow: '0 40px 100px rgba(0,0,0,0.7)',
-          transform: mounted ? 'translateY(0) scale(1)' : 'translateY(20px) scale(0.97)',
-          opacity: mounted ? 1 : 0,
-          transition: 'transform 0.24s cubic-bezier(0.34,1.3,0.64,1), opacity 0.2s ease',
+          transform: mounted
+            ? 'translateY(0)'
+            : isMobile ? 'translateY(100%)' : 'translateY(20px) scale(0.97)',
+          opacity: mounted ? 1 : isMobile ? 1 : 0,
+          transition: isMobile
+            ? 'transform 0.3s cubic-bezier(0.32,0.72,0,1)'
+            : 'transform 0.24s cubic-bezier(0.34,1.3,0.64,1), opacity 0.2s ease',
         }}
       >
         {/* Search input */}

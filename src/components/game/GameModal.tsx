@@ -3,6 +3,7 @@ import ReactMarkdown from 'react-markdown'
 import { useCabinetStore, STATUSES, STATUS_LABELS, STATUS_COLORS } from '../../store/cabinetStore'
 import { fetchGameDetails } from '../../lib/gameDetailsCache'
 import type { CabinetGame, GameList, GameDetails } from '../../types'
+import { useIsMobile } from '../../hooks/useIsMobile'
 
 export function GameModal({ game, onClose, readOnly = false }: { game: CabinetGame; onClose: () => void; readOnly?: boolean }) {
   const [mounted, setMounted] = useState(false)
@@ -12,6 +13,7 @@ export function GameModal({ game, onClose, readOnly = false }: { game: CabinetGa
   const [pendingRating, setPendingRating] = useState(game.rating)
   const [pendingReview, setPendingReview] = useState(game.review ?? '')
   const [dirty, setDirty] = useState(false)
+  const isMobile = useIsMobile()
 
   const { updateStatus, updateRating, updateReview, removeGame, moveToList } = useCabinetStore()
 
@@ -44,6 +46,7 @@ export function GameModal({ game, onClose, readOnly = false }: { game: CabinetGa
 
   return (
     <>
+
       <style>{`
         .review-markdown { color: var(--text); font-size: 14px; line-height: 1.7; }
         .review-markdown p { margin: 0 0 10px; }
@@ -71,7 +74,25 @@ export function GameModal({ game, onClose, readOnly = false }: { game: CabinetGa
               ? <img src={game.cover} alt={game.title} style={{ width: '100%', height: 260, objectFit: 'cover', borderRadius: '20px 20px 0 0', display: 'block' }} />
               : <div style={{ width: '100%', height: 260, background: 'var(--surface2)', borderRadius: '20px 20px 0 0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 64 }}>🎮</div>
             }
-            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, var(--surface) 0%, rgba(0,0,0,0.1) 60%)', borderRadius: '20px 20px 0 0' }} />
+            <div style={{
+              background: 'var(--surface)',
+              border: '1px solid var(--border)',
+              borderRadius: isMobile ? '20px 20px 0 0' : 20,
+              width: '100%',
+              maxWidth: isMobile ? '100%' : 700,
+              maxHeight: isMobile ? '92vh' : '90vh',
+              overflowY: 'auto',
+              boxShadow: '0 40px 100px rgba(0,0,0,0.7)',
+              transform: mounted
+                ? 'translateY(0) scale(1)'
+                : isMobile ? 'translateY(100%)' : 'translateY(24px) scale(0.97)',
+              opacity: mounted ? 1 : isMobile ? 1 : 0,
+              transition: isMobile
+                ? 'transform 0.3s cubic-bezier(0.32,0.72,0,1)'
+                : 'transform 0.26s cubic-bezier(0.34,1.3,0.64,1), opacity 0.22s ease',
+              display: 'flex',
+              flexDirection: 'column',
+            }} />
             <div style={{ position: 'absolute', bottom: 20, left: 28, right: 60 }}>
               <h2 style={{ margin: '0 0 6px', fontFamily: 'Bebas Neue', fontSize: 34, letterSpacing: 1.5, color: '#fff', textShadow: '0 2px 12px rgba(0,0,0,0.8)', lineHeight: 1 }}>
                 {game.title}
@@ -123,7 +144,7 @@ export function GameModal({ game, onClose, readOnly = false }: { game: CabinetGa
             {!readOnly && (
               <Section label="RATING">
                 <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
-                  {[1,2,3,4,5,6,7,8,9,10].map(n => (
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => (
                     <button key={n} onClick={() => markDirty(setPendingRating)(pendingRating === n ? null : n)} style={{ width: 38, height: 38, borderRadius: 8, border: 'none', background: (pendingRating ?? 0) >= n ? 'var(--accent)' : 'var(--surface2)', color: (pendingRating ?? 0) >= n ? '#000' : 'var(--muted)', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', transition: 'all 0.12s', transform: (pendingRating ?? 0) >= n ? 'scale(1.1)' : 'scale(1)' }}>
                       {n}
                     </button>
@@ -139,7 +160,7 @@ export function GameModal({ game, onClose, readOnly = false }: { game: CabinetGa
             {readOnly && game.rating && (
               <Section label="RATING">
                 <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
-                  {[1,2,3,4,5,6,7,8,9,10].map(n => (
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => (
                     <div key={n} style={{ width: 38, height: 38, borderRadius: 8, background: (game.rating ?? 0) >= n ? 'var(--accent)' : 'var(--surface2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: (game.rating ?? 0) >= n ? '#000' : 'var(--muted)', fontSize: 14, fontWeight: 700 }}>
                       {n}
                     </div>
@@ -172,8 +193,8 @@ export function GameModal({ game, onClose, readOnly = false }: { game: CabinetGa
                   {(readOnly ? game.review : pendingReview)
                     ? <ReactMarkdown>{readOnly ? game.review! : pendingReview}</ReactMarkdown>
                     : <span style={{ color: 'var(--muted)', fontStyle: 'italic' }}>
-                        {readOnly ? 'No review written.' : 'No review yet — toggle Edit to write one.'}
-                      </span>
+                      {readOnly ? 'No review written.' : 'No review yet — toggle Edit to write one.'}
+                    </span>
                   }
                 </div>
               )}

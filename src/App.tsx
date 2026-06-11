@@ -3,8 +3,10 @@ import { supabase } from './lib/supabase'
 import { useAuthStore } from './store/authStore'
 import { useCabinetStore } from './store/cabinetStore'
 import { useProfileStore } from './store/profileStore'
-import { useRealtimeNotifications } from './hooks/useRealTimeNotifications'
+import { useIsMobile } from './hooks/useIsMobile'
 import { Sidebar } from './components/layout/Sidebar'
+import { BottomNav } from './components/layout/BottomNav'
+import { useRealtimeNotifications } from './hooks/useRealTimeNotifications.ts'
 import { CabinetPage } from './pages/CabinetPage'
 import { AuthPage } from './pages/AuthPage'
 import { ProfileSetupPage } from './pages/ProfileSetupPage'
@@ -24,8 +26,8 @@ function App() {
   const fetchGames = useCabinetStore(s => s.fetchGames)
   const { profile, loadingProfile, fetchProfile } = useProfileStore()
   const [page, setPage] = useState<Page>({ id: 'cabinet' })
+  const isMobile = useIsMobile()
 
-  // realtime notifications — fires once user is known
   useRealtimeNotifications(user?.id)
 
   useEffect(() => {
@@ -56,38 +58,45 @@ function App() {
   if (loadingProfile) return <Splash />
   if (!profile) return <ProfileSetupPage userId={user.id} />
 
-  const renderPage = () => {
-    switch (page.id) {
-      case 'cabinet': return <CabinetPage />
-      case 'profile': return <ProfilePage onViewCabinet={(userId, username) => setPage({ id: 'view-cabinet', userId, username })} />
-      case 'social': return (
-        <SocialPage
-          onViewProfile={username => setPage({ id: 'view-profile', username })}
-          onViewCabinet={(userId, username) => setPage({ id: 'view-cabinet', userId, username })}
-        />
-      )
-      case 'view-profile': return (
-        <ProfilePage
-          username={page.username}
-          onViewCabinet={(userId, username) => setPage({ id: 'view-cabinet', userId, username })}
-        />
-      )
-      case 'view-cabinet': return (
-        <FriendCabinetPage
-          userId={page.userId}
-          username={page.username}
-          onBack={() => setPage({ id: 'social' })}
-        />
-      )
-    }
-  }
+  const isDynamic = page.id === 'view-profile' || page.id === 'view-cabinet'
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg)' }}>
-      <Sidebar currentPage={page.id} onNavigate={setPage} />
-      <div style={{ marginLeft: 220, flex: 1, minWidth: 0 }}>
-        {renderPage()}
+      {!isMobile && <Sidebar currentPage={page.id} onNavigate={setPage} />}
+
+      <div style={{
+        marginLeft: isMobile ? 0 : 220,
+        flex: 1, minWidth: 0,
+        paddingBottom: isMobile ? 70 : 0, // space for bottom nav
+      }}>
+        <div style={{ display: !isDynamic && page.id === 'cabinet' ? 'block' : 'none' }}>
+          <CabinetPage />
+        </div>
+        <div style={{ display: !isDynamic && page.id === 'profile' ? 'block' : 'none' }}>
+          <ProfilePage onViewCabinet={(userId, username) => setPage({ id: 'view-cabinet', userId, username })} />
+        </div>
+        <div style={{ display: !isDynamic && page.id === 'social' ? 'block' : 'none' }}>
+          <SocialPage
+            onViewProfile={username => setPage({ id: 'view-profile', username })}
+            onViewCabinet={(userId, username) => setPage({ id: 'view-cabinet', userId, username })}
+          />
+        </div>
+        {page.id === 'view-profile' && (
+          <ProfilePage
+            username={page.username}
+            onViewCabinet={(userId, username) => setPage({ id: 'view-cabinet', userId, username })}
+          />
+        )}
+        {page.id === 'view-cabinet' && (
+          <FriendCabinetPage
+            userId={page.userId}
+            username={page.username}
+            onBack={() => setPage({ id: 'social' })}
+          />
+        )}
       </div>
+
+      {isMobile && <BottomNav currentPage={page.id} onNavigate={setPage} />}
     </div>
   )
 }
