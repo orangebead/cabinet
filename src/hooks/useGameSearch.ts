@@ -6,7 +6,7 @@ import type { RawgGame } from '../types'
 async function searchRAWG(query: string): Promise<RawgGame[]> {
   // No try/catch here anymore. If fetch fails or res is not ok, 
   // the error will naturally propagate to TanStack Query.
-  const res = await fetch(`/api/search-games?query=${encodeURIComponent(query)}`)
+  const res = await fetch(`/api/games-search?query=${encodeURIComponent(query)}`)
   
   if (!res.ok) {
     throw new Error('Failed to fetch games from server')

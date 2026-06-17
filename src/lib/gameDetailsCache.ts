@@ -11,9 +11,8 @@ export async function fetchGameDetails(rawg_id: number): Promise<GameDetails | n
     const data: GameDetails = await res.json()
     cache.set(rawg_id, data)
     return data
-  } catch {
-    const mock: GameDetails = { released: '2018-10-26', publishers: [{ name: 'Rockstar Games' }] }
-    cache.set(rawg_id, mock)
-    return mock
+  } catch (error) {
+    console.error('Network error fetching game details:', error)
+    return null 
   }
 }

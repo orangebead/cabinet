@@ -7,7 +7,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({ error: 'Missing search query' })
   }
 
-  const apiKey = process.env.RAWG_API_KEY
+  const apiKey = process.env.RAWG_K
   if (!apiKey) {
     return res.status(500).json({ error: 'Server misconfigured' })
   }
