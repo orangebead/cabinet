@@ -10,27 +10,26 @@ import {
   FaWindows,
   FaApple,
   FaLinux,
-  FaAndroid,
-  FaSteam,       // New
-  FaGooglePlay,  // New
-  FaItchIo,      // New
-  FaGamepad      // Generic fallback for stores without a stable FA icon
+  // FaSteam,       // New
+  // FaGooglePlay,  // New
+  // FaItchIo,      // New
+  // FaGamepad      // Generic fallback for stores without a stable FA icon
 } from 'react-icons/fa';
 import { BsNintendoSwitch } from 'react-icons/bs';
 
 // ── Store icon helper ──────────────────────────────────────────────────────────
-const STORE_ICONS: Record<string, React.ElementType> = {
-  'steam': FaSteam,
-  'playstation-store': FaPlaystation,
-  'xbox-store': FaXbox,
-  'xbox360': FaXbox,
-  'nintendo': BsNintendoSwitch,
-  'apple-appstore': FaApple,
-  'google-play': FaGooglePlay,
-  'itch.io': FaItchIo,
-  'epic-games': FaGamepad,
-  'gog': FaGamepad,
-}
+// const STORE_ICONS: Record<string, React.ElementType> = {
+//   'steam': FaSteam,
+//   'playstation-store': FaPlaystation,
+//   'xbox-store': FaXbox,
+//   'xbox360': FaXbox,
+//   'nintendo': BsNintendoSwitch,
+//   'apple-appstore': FaApple,
+//   'google-play': FaGooglePlay,
+//   'itch.io': FaItchIo,
+//   'epic-games': FaGamepad,
+//   'gog': FaGamepad,
+// }
 
 // ── Platform config ────────────────────────────────────────────────────────────
 // Maps RAWG platform slugs to display labels and a simple icon character.
