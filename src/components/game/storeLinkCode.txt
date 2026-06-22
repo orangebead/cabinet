@@ -1,0 +1,28 @@
+{!readOnly && stores.length > 0 && (
+                <div>
+                  <div style={{ fontSize: 10, color: 'var(--muted)', letterSpacing: '0.12em', fontWeight: 700, marginBottom: 6 }}>BUY</div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
+                    {stores.map((s: any) => {
+                      // 1. Assign the component reference to a variable starting with a Capital letter
+                      // 2. Provide FaGamepad as a fallback if the store isn't mapped
+                      const StoreIcon = STORE_ICONS[s.store.slug] || FaGamepad;
+
+                      return (
+                        <a
+                          key={s.store.id}
+                          href={s.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="gm-store-link"
+                          style={{ ...pillStyle, textDecoration: 'none', transition: 'border-color 0.15s, color 0.15s' }}
+                        >
+                          {/* Render it as a JSX element */}
+                          <StoreIcon style={{ fontSize: 12, marginRight: 4 }} />
+                          {s.store.name}
+                          <span style={{ fontSize: 10, opacity: 0.45, marginLeft: 4 }}>↗</span>
+                        </a>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}

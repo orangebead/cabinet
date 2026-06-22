@@ -4,26 +4,45 @@ import { useCabinetStore, STATUSES, STATUS_LABELS, STATUS_COLORS } from '../../s
 import { fetchGameDetails } from '../../lib/gameDetailsCache'
 import type { CabinetGame, GameList, GameDetails } from '../../types'
 import { useIsMobile } from '../../hooks/useIsMobile'
+import {
+  FaPlaystation,
+  FaXbox,
+  FaWindows,
+  FaApple,
+  FaLinux,
+  FaAndroid,
+  FaSteam,       // New
+  FaGooglePlay,  // New
+  FaItchIo,      // New
+  FaGamepad      // Generic fallback for stores without a stable FA icon
+} from 'react-icons/fa';
+import { BsNintendoSwitch } from 'react-icons/bs';
+
+// ── Store icon helper ──────────────────────────────────────────────────────────
+const STORE_ICONS: Record<string, React.ElementType> = {
+  'steam': FaSteam,
+  'playstation-store': FaPlaystation,
+  'xbox-store': FaXbox,
+  'xbox360': FaXbox,
+  'nintendo': BsNintendoSwitch,
+  'apple-appstore': FaApple,
+  'google-play': FaGooglePlay,
+  'itch.io': FaItchIo,
+  'epic-games': FaGamepad,
+  'gog': FaGamepad,
+}
 
 // ── Platform config ────────────────────────────────────────────────────────────
 // Maps RAWG platform slugs to display labels and a simple icon character.
 // Extend this map as needed — RAWG slugs are stable identifiers.
-const PLATFORM_MAP: Record<string, { label: string; icon: string }> = {
-  'playstation1':    { label: 'PS1',       icon: '🎮' },
-  'playstation2':    { label: 'PS2',       icon: '🎮' },
-  'playstation3':    { label: 'PS3',       icon: '🎮' },
-  'playstation4':    { label: 'PS4',       icon: '🎮' },
-  'playstation5':    { label: 'PS5',       icon: '🎮' },
-  'xbox':            { label: 'Xbox',      icon: '🟢' },
-  'xbox360':         { label: 'Xbox 360',  icon: '🟢' },
-  'xbox-one':        { label: 'Xbox One',  icon: '🟢' },
-  'xbox-series-x':   { label: 'Series X/S', icon: '🟢' },
-  'pc':              { label: 'PC',        icon: '🖥' },
-  'nintendo-switch': { label: 'Switch',    icon: '🔴' },
-  'ios':             { label: 'iOS',       icon: '📱' },
-  'android':         { label: 'Android',   icon: '📱' },
-  'macos':           { label: 'Mac',       icon: '🖥' },
-  'linux':           { label: 'Linux',     icon: '🖥' },
+const PLATFORM_MAP: Record<string, { label: string; Icon: React.ElementType }> = {
+  'playstation4': { label: 'PS4', Icon: FaPlaystation },
+  'playstation5': { label: 'PS5', Icon: FaPlaystation },
+  'xbox-series-x': { label: 'Series X/S', Icon: FaXbox },
+  'pc': { label: 'PC', Icon: FaWindows },
+  'nintendo-switch': { label: 'Switch', Icon: BsNintendoSwitch },
+  'macos': { label: 'Mac', Icon: FaApple },
+  'linux': { label: 'Linux', Icon: FaLinux },
 }
 
 // ── Metacritic colour thresholds ───────────────────────────────────────────────
@@ -33,19 +52,7 @@ function metacriticStyle(score: number): { bg: string; color: string; border: st
   return { bg: '#2e1a1a', color: '#f87171', border: '#4a2a2a' }
 }
 
-// ── Store icon helper ──────────────────────────────────────────────────────────
-const STORE_ICONS: Record<string, string> = {
-  'steam': '🎮',
-  'playstation-store': '🎮',
-  'xbox-store': '🟢',
-  'xbox360': '🟢',
-  'gog': '📦',
-  'nintendo': '🔴',
-  'epic-games': '⚡',
-  'itch.io': '🕹',
-  'google-play': '📱',
-  'apple-appstore': '📱',
-}
+
 
 export function GameModal({ game, onClose, readOnly = false }: { game: CabinetGame; onClose: () => void; readOnly?: boolean }) {
   const [mounted, setMounted] = useState(false)
@@ -76,21 +83,21 @@ export function GameModal({ game, onClose, readOnly = false }: { game: CabinetGa
   }
 
   // ── Derived metadata ─────────────────────────────────────────────────────────
-  const developer  = details?.developers?.[0]?.name
-  const publisher  = details?.publishers?.[0]?.name
-  const year       = details?.released?.split('-')[0]
+  const developer = details?.developers?.[0]?.name
+  const publisher = details?.publishers?.[0]?.name
+  const year = details?.released?.split('-')[0]
   const metacritic = details?.metacritic
-  const esrb       = details?.esrb_rating?.name
-  const platforms  = details?.platforms?.map((p: any) => p.platform) ?? []
-  const tags       = details?.tags?.slice(0, showAllTags ? 20 : 5) ?? []
-  const totalTags  = details?.tags?.length ?? 0
-  const stores     = details?.stores ?? []
+  const esrb = details?.esrb_rating?.name
+  const platforms = details?.platforms?.map((p: any) => p.platform) ?? []
+  const tags = details?.tags?.slice(0, showAllTags ? 20 : 5) ?? []
+  const totalTags = details?.tags?.length ?? 0
+  const stores = details?.stores ?? []
 
   const otherLists: GameList[] = (['cabinet', 'backlog', 'wishlist'] as GameList[]).filter(l => l !== game.list)
   const listStyles: Record<GameList, { bg: string; color: string; border: string }> = {
-    cabinet:  { bg: 'var(--surface2)', color: 'var(--text)',   border: 'var(--border)' },
-    backlog:  { bg: '#1a2a3f',         color: '#60a5fa',        border: '#2a4a6f' },
-    wishlist: { bg: '#2a1a3f',         color: '#c084fc',        border: '#4a2a6f' },
+    cabinet: { bg: 'var(--surface2)', color: 'var(--text)', border: 'var(--border)' },
+    backlog: { bg: '#1a2a3f', color: '#60a5fa', border: '#2a4a6f' },
+    wishlist: { bg: '#2a1a3f', color: '#c084fc', border: '#4a2a6f' },
   }
 
   // ── Shared pill style ────────────────────────────────────────────────────────
@@ -153,7 +160,13 @@ export function GameModal({ game, onClose, readOnly = false }: { game: CabinetGa
         <div onClick={e => e.stopPropagation()} style={modalStyle}>
 
           {/* ── TOP PANEL: metadata left, cover right ── */}
-          <div style={{ display: 'flex', minHeight: isMobile ? 'auto' : 220, position: 'relative' }}>
+          <div style={{
+            display: 'flex',
+            minHeight: isMobile ? 'auto' : 220,
+            height: 'auto',       // Forces container to expand with content
+            flexShrink: 0,        // Prevents the modal body from crushing this section
+            position: 'relative'
+          }}>
 
             {/* Left column — all game info */}
             <div style={{ flex: 1, padding: isMobile ? '18px 16px 16px' : '22px 22px 18px', display: 'flex', flexDirection: 'column', gap: 14, minWidth: 0 }}>
@@ -210,9 +223,11 @@ export function GameModal({ game, onClose, readOnly = false }: { game: CabinetGa
                     {platforms.map((p: any) => {
                       const mapped = PLATFORM_MAP[p.slug]
                       if (!mapped) return null
+
+                      // mapped.Icon must be rendered as a component tag <mapped.Icon />
                       return (
                         <span key={p.slug} style={pillStyle}>
-                          <span style={{ fontSize: 11 }}>{mapped.icon}</span>
+                          <mapped.Icon style={{ fontSize: 12, marginRight: 4 }} />
                           {mapped.label}
                         </span>
                       )
@@ -220,6 +235,8 @@ export function GameModal({ game, onClose, readOnly = false }: { game: CabinetGa
                   </div>
                 </div>
               )}
+
+              {/* Store links */}
 
               {/* Tags */}
               {totalTags > 0 && (
@@ -242,48 +259,29 @@ export function GameModal({ game, onClose, readOnly = false }: { game: CabinetGa
                 </div>
               )}
 
-              {/* Store links — hide in read-only */}
-              {!readOnly && stores.length > 0 && (
-                <div>
-                  <div style={{ fontSize: 10, color: 'var(--muted)', letterSpacing: '0.12em', fontWeight: 700, marginBottom: 6 }}>BUY</div>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
-                    {stores.map((s: any) => (
-                      <a
-                        key={s.store.id}
-                        href={s.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="gm-store-link"
-                        style={{ ...pillStyle, textDecoration: 'none', transition: 'border-color 0.15s, color 0.15s' }}
-                      >
-                        <span style={{ fontSize: 11 }}>{STORE_ICONS[s.store.slug] ?? '🛒'}</span>
-                        {s.store.name}
-                        <span style={{ fontSize: 10, opacity: 0.45 }}>↗</span>
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              )}
+
             </div>
 
             {/* Right column — cover art */}
             <div style={{
               width: isMobile ? 110 : 148,
+              aspectRatio: '3/4',
               flexShrink: 0,
-              borderRadius: isMobile ? '0 20px 0 0' : '0 20px 0 0',
+              borderRadius: 12,
               overflow: 'hidden',
-              alignSelf: 'stretch',
+              alignSelf: 'center',
+              marginRight: isMobile ? 16 : 24, // Adds breathing room against the right wall
             }}>
               {game.cover
                 ? <img src={game.cover} alt={game.title} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} loading="lazy" decoding="async" />
-                : <div style={{ width: '100%', height: '100%', minHeight: 180, background: 'var(--surface2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 40 }}>🎮</div>
+                : <div style={{ width: '100%', height: '100%', background: 'var(--surface2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--muted)', fontSize: 12, fontWeight: 700 }}>NO COVER</div>
               }
             </div>
 
             {/* Badges overlaid on top of the panel */}
             {readOnly && (
               <div style={{ position: 'absolute', top: 12, left: 12, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', color: 'var(--muted)', fontSize: 11, fontWeight: 600, padding: '4px 10px', borderRadius: 6, letterSpacing: 0.5 }}>
-                👁 View Only
+                View Only
               </div>
             )}
             <button
