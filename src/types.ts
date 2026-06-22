@@ -26,6 +26,12 @@ export interface RawgGame {
 export interface GameDetails {
   released: string | null
   publishers: { name: string }[]
+  developers?: { name: string }[]
+  metacritic?: number
+  esrb_rating?: { name: string }
+  platforms?: { platform: { name: string; slug: string } }[]
+  tags?: { id: number; name: string; slug: string }[]
+  stores?: { store: { id: number; name: string; slug: string }; url: string }[]
 }
 
 export interface Profile {

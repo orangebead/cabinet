@@ -5,6 +5,48 @@ import { fetchGameDetails } from '../../lib/gameDetailsCache'
 import type { CabinetGame, GameList, GameDetails } from '../../types'
 import { useIsMobile } from '../../hooks/useIsMobile'
 
+// ── Platform config ────────────────────────────────────────────────────────────
+// Maps RAWG platform slugs to display labels and a simple icon character.
+// Extend this map as needed — RAWG slugs are stable identifiers.
+const PLATFORM_MAP: Record<string, { label: string; icon: string }> = {
+  'playstation1':    { label: 'PS1',       icon: '🎮' },
+  'playstation2':    { label: 'PS2',       icon: '🎮' },
+  'playstation3':    { label: 'PS3',       icon: '🎮' },
+  'playstation4':    { label: 'PS4',       icon: '🎮' },
+  'playstation5':    { label: 'PS5',       icon: '🎮' },
+  'xbox':            { label: 'Xbox',      icon: '🟢' },
+  'xbox360':         { label: 'Xbox 360',  icon: '🟢' },
+  'xbox-one':        { label: 'Xbox One',  icon: '🟢' },
+  'xbox-series-x':   { label: 'Series X/S', icon: '🟢' },
+  'pc':              { label: 'PC',        icon: '🖥' },
+  'nintendo-switch': { label: 'Switch',    icon: '🔴' },
+  'ios':             { label: 'iOS',       icon: '📱' },
+  'android':         { label: 'Android',   icon: '📱' },
+  'macos':           { label: 'Mac',       icon: '🖥' },
+  'linux':           { label: 'Linux',     icon: '🖥' },
+}
+
+// ── Metacritic colour thresholds ───────────────────────────────────────────────
+function metacriticStyle(score: number): { bg: string; color: string; border: string } {
+  if (score >= 75) return { bg: '#1a2e1a', color: '#4ade80', border: '#2a4a2a' }
+  if (score >= 50) return { bg: '#2e2a1a', color: '#facc15', border: '#4a3f1a' }
+  return { bg: '#2e1a1a', color: '#f87171', border: '#4a2a2a' }
+}
+
+// ── Store icon helper ──────────────────────────────────────────────────────────
+const STORE_ICONS: Record<string, string> = {
+  'steam': '🎮',
+  'playstation-store': '🎮',
+  'xbox-store': '🟢',
+  'xbox360': '🟢',
+  'gog': '📦',
+  'nintendo': '🔴',
+  'epic-games': '⚡',
+  'itch.io': '🕹',
+  'google-play': '📱',
+  'apple-appstore': '📱',
+}
+
 export function GameModal({ game, onClose, readOnly = false }: { game: CabinetGame; onClose: () => void; readOnly?: boolean }) {
   const [mounted, setMounted] = useState(false)
   const [details, setDetails] = useState<GameDetails | null>(null)
@@ -13,6 +55,7 @@ export function GameModal({ game, onClose, readOnly = false }: { game: CabinetGa
   const [pendingRating, setPendingRating] = useState(game.rating)
   const [pendingReview, setPendingReview] = useState(game.review ?? '')
   const [dirty, setDirty] = useState(false)
+  const [showAllTags, setShowAllTags] = useState(false)
   const isMobile = useIsMobile()
 
   const { updateStatus, updateRating, updateReview, removeGame, moveToList } = useCabinetStore()
@@ -24,9 +67,7 @@ export function GameModal({ game, onClose, readOnly = false }: { game: CabinetGa
   }, [game.rawg_id])
 
   const markDirty = <T,>(setter: (v: T) => void) => (v: T) => { setter(v); setDirty(true) }
-
   const close = () => { setMounted(false); setTimeout(onClose, 260) }
-
   const confirm = () => {
     updateStatus(game.id, pendingStatus)
     updateRating(game.id, pendingRating)
@@ -34,19 +75,65 @@ export function GameModal({ game, onClose, readOnly = false }: { game: CabinetGa
     setDirty(false)
   }
 
-  const publisher = details?.publishers?.[0]?.name
-  const year = details?.released?.split('-')[0]
-  const otherLists: GameList[] = (['cabinet', 'backlog', 'wishlist'] as GameList[]).filter(l => l !== game.list)
+  // ── Derived metadata ─────────────────────────────────────────────────────────
+  const developer  = details?.developers?.[0]?.name
+  const publisher  = details?.publishers?.[0]?.name
+  const year       = details?.released?.split('-')[0]
+  const metacritic = details?.metacritic
+  const esrb       = details?.esrb_rating?.name
+  const platforms  = details?.platforms?.map((p: any) => p.platform) ?? []
+  const tags       = details?.tags?.slice(0, showAllTags ? 20 : 5) ?? []
+  const totalTags  = details?.tags?.length ?? 0
+  const stores     = details?.stores ?? []
 
-  const listStyles: Record<GameList, { bg: string; color: string; border: string; icon: string }> = {
-    cabinet: { bg: 'var(--surface2)', color: 'var(--text)', border: 'var(--border)', icon: '🗃️' },
-    backlog: { bg: '#1a2a3f', color: '#60a5fa', border: '#2a4a6f', icon: '📋' },
-    wishlist: { bg: '#2a1a3f', color: '#c084fc', border: '#4a2a6f', icon: '✨' },
+  const otherLists: GameList[] = (['cabinet', 'backlog', 'wishlist'] as GameList[]).filter(l => l !== game.list)
+  const listStyles: Record<GameList, { bg: string; color: string; border: string }> = {
+    cabinet:  { bg: 'var(--surface2)', color: 'var(--text)',   border: 'var(--border)' },
+    backlog:  { bg: '#1a2a3f',         color: '#60a5fa',        border: '#2a4a6f' },
+    wishlist: { bg: '#2a1a3f',         color: '#c084fc',        border: '#4a2a6f' },
+  }
+
+  // ── Shared pill style ────────────────────────────────────────────────────────
+  const pillStyle: React.CSSProperties = {
+    display: 'inline-flex', alignItems: 'center', gap: 5,
+    padding: '3px 9px', borderRadius: 6, fontSize: 12, fontWeight: 500,
+    border: '1px solid var(--border)', color: 'var(--muted)',
+    background: 'var(--surface2)', whiteSpace: 'nowrap' as const,
+    fontFamily: 'DM Sans, sans-serif',
+  }
+
+  // ── Animation styles ─────────────────────────────────────────────────────────
+  const overlayStyle: React.CSSProperties = {
+    position: 'fixed', inset: 0, zIndex: 200,
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    padding: isMobile ? 0 : 24,
+    background: mounted ? 'rgba(0,0,0,0.75)' : 'rgba(0,0,0,0)',
+    backdropFilter: mounted ? 'blur(6px)' : 'blur(0px)',
+    transition: 'background 0.25s ease, backdrop-filter 0.25s ease',
+  }
+
+  const modalStyle: React.CSSProperties = {
+    background: 'var(--surface)',
+    border: '1px solid var(--border)',
+    borderRadius: isMobile ? '20px 20px 0 0' : 20,
+    width: '100%',
+    maxWidth: isMobile ? '100%' : 700,
+    maxHeight: isMobile ? '92vh' : '90vh',
+    overflowY: 'auto',
+    boxShadow: '0 40px 100px rgba(0,0,0,0.7)',
+    transform: mounted
+      ? 'translateY(0) scale(1)'
+      : isMobile ? 'translateY(100%)' : 'translateY(24px) scale(0.97)',
+    opacity: mounted ? 1 : isMobile ? 1 : 0,
+    transition: isMobile
+      ? 'transform 0.3s cubic-bezier(0.32,0.72,0,1)'
+      : 'transform 0.26s cubic-bezier(0.34,1.3,0.64,1), opacity 0.22s ease',
+    display: 'flex', flexDirection: 'column',
+    ...(isMobile ? { position: 'fixed', bottom: 0, left: 0, right: 0 } : {}),
   }
 
   return (
     <>
-
       <style>{`
         .review-markdown { color: var(--text); font-size: 14px; line-height: 1.7; }
         .review-markdown p { margin: 0 0 10px; }
@@ -58,72 +145,167 @@ export function GameModal({ game, onClose, readOnly = false }: { game: CabinetGa
         .review-markdown blockquote { border-left: 3px solid var(--accent); padding-left: 12px; color: var(--muted); margin: 10px 0; }
         .review-markdown hr { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
         .review-markdown code { background: var(--surface2); padding: 2px 6px; border-radius: 4px; font-size: 12px; }
+        .gm-store-link:hover { border-color: var(--muted) !important; color: var(--text) !important; }
+        .gm-tag-more:hover { color: var(--text) !important; }
       `}</style>
 
-      <div
-        onClick={close}
-        style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24, background: mounted ? 'rgba(0,0,0,0.75)' : 'rgba(0,0,0,0)', backdropFilter: mounted ? 'blur(6px)' : 'blur(0px)', transition: 'background 0.25s ease, backdrop-filter 0.25s ease' }}
-      >
-        <div
-          onClick={e => e.stopPropagation()}
-          style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 20, width: '100%', maxWidth: 700, maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 40px 100px rgba(0,0,0,0.7)', transform: mounted ? 'translateY(0) scale(1)' : 'translateY(24px) scale(0.97)', opacity: mounted ? 1 : 0, transition: 'transform 0.26s cubic-bezier(0.34,1.3,0.64,1), opacity 0.22s ease', display: 'flex', flexDirection: 'column' }}
-        >
-          {/* Hero */}
-          <div style={{ position: 'relative', flexShrink: 0 }}>
-            {game.cover
-              ? <img src={game.cover} alt={game.title} style={{ width: '100%', height: 260, objectFit: 'cover', borderRadius: '20px 20px 0 0', display: 'block' }} />
-              : <div style={{ width: '100%', height: 260, background: 'var(--surface2)', borderRadius: '20px 20px 0 0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 64 }}>🎮</div>
-            }
-            <div style={{
-              background: 'var(--surface)',
-              border: '1px solid var(--border)',
-              borderRadius: isMobile ? '20px 20px 0 0' : 20,
-              width: '100%',
-              maxWidth: isMobile ? '100%' : 700,
-              maxHeight: isMobile ? '92vh' : '90vh',
-              overflowY: 'auto',
-              boxShadow: '0 40px 100px rgba(0,0,0,0.7)',
-              transform: mounted
-                ? 'translateY(0) scale(1)'
-                : isMobile ? 'translateY(100%)' : 'translateY(24px) scale(0.97)',
-              opacity: mounted ? 1 : isMobile ? 1 : 0,
-              transition: isMobile
-                ? 'transform 0.3s cubic-bezier(0.32,0.72,0,1)'
-                : 'transform 0.26s cubic-bezier(0.34,1.3,0.64,1), opacity 0.22s ease',
-              display: 'flex',
-              flexDirection: 'column',
-            }} />
-            <div style={{ position: 'absolute', bottom: 20, left: 28, right: 60 }}>
-              <h2 style={{ margin: '0 0 6px', fontFamily: 'Bebas Neue', fontSize: 34, letterSpacing: 1.5, color: '#fff', textShadow: '0 2px 12px rgba(0,0,0,0.8)', lineHeight: 1 }}>
-                {game.title}
-              </h2>
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                {publisher && <span style={{ color: 'rgba(255,255,255,0.75)', fontSize: 13, fontWeight: 500 }}>{publisher}</span>}
-                {publisher && year && <span style={{ color: 'rgba(255,255,255,0.3)' }}>·</span>}
-                {year && <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13 }}>{year}</span>}
-                {!details && <span style={{ color: 'rgba(255,255,255,0.25)', fontSize: 12, fontStyle: 'italic' }}>Loading...</span>}
+      <div onClick={close} style={overlayStyle}>
+        <div onClick={e => e.stopPropagation()} style={modalStyle}>
+
+          {/* ── TOP PANEL: metadata left, cover right ── */}
+          <div style={{ display: 'flex', minHeight: isMobile ? 'auto' : 220, position: 'relative' }}>
+
+            {/* Left column — all game info */}
+            <div style={{ flex: 1, padding: isMobile ? '18px 16px 16px' : '22px 22px 18px', display: 'flex', flexDirection: 'column', gap: 14, minWidth: 0 }}>
+
+              {/* Title + subtitle */}
+              <div>
+                <h2 style={{ margin: '0 0 4px', fontFamily: 'Bebas Neue', fontSize: isMobile ? 26 : 30, letterSpacing: 1.2, color: 'var(--text)', lineHeight: 1.05 }}>
+                  {game.title}
+                </h2>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px 8px', alignItems: 'center' }}>
+                  {developer && <span style={{ color: 'var(--text)', fontSize: 12, fontWeight: 600 }}>{developer}</span>}
+                  {developer && (publisher || year) && <span style={{ color: 'var(--border)', fontSize: 12 }}>·</span>}
+                  {publisher && developer !== publisher && <span style={{ color: 'var(--muted)', fontSize: 12 }}>{publisher}</span>}
+                  {publisher && developer !== publisher && year && <span style={{ color: 'var(--border)', fontSize: 12 }}>·</span>}
+                  {year && <span style={{ color: 'var(--muted)', fontSize: 12 }}>{year}</span>}
+                  {!details && <span style={{ color: 'var(--muted)', fontSize: 11, fontStyle: 'italic' }}>Loading…</span>}
+                </div>
               </div>
+
+              {/* Metacritic + ESRB row */}
+              {(metacritic || esrb) && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                  {metacritic && (() => {
+                    const s = metacriticStyle(metacritic)
+                    return (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <div style={{ width: 42, height: 42, borderRadius: 8, background: s.bg, border: `1px solid ${s.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Bebas Neue', fontSize: 20, color: s.color, letterSpacing: 0.5, flexShrink: 0 }}>
+                          {metacritic}
+                        </div>
+                        <div>
+                          <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text)' }}>Metacritic</div>
+                          <div style={{ fontSize: 10, color: 'var(--muted)' }}>Critic score</div>
+                        </div>
+                      </div>
+                    )
+                  })()}
+                  {metacritic && esrb && <div style={{ width: 1, height: 32, background: 'var(--border)' }} />}
+                  {esrb && (
+                    <div>
+                      <div style={{ fontSize: 10, color: 'var(--muted)', letterSpacing: '0.1em', marginBottom: 3 }}>AGE RATING</div>
+                      <div style={{ display: 'inline-block', padding: '2px 8px', borderRadius: 5, fontSize: 11, fontWeight: 600, background: '#2a1f10', color: '#f59e0b', border: '1px solid #4a3520' }}>
+                        {esrb}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Platforms */}
+              {platforms.length > 0 && (
+                <div>
+                  <div style={{ fontSize: 10, color: 'var(--muted)', letterSpacing: '0.12em', fontWeight: 700, marginBottom: 6 }}>PLATFORMS</div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
+                    {platforms.map((p: any) => {
+                      const mapped = PLATFORM_MAP[p.slug]
+                      if (!mapped) return null
+                      return (
+                        <span key={p.slug} style={pillStyle}>
+                          <span style={{ fontSize: 11 }}>{mapped.icon}</span>
+                          {mapped.label}
+                        </span>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Tags */}
+              {totalTags > 0 && (
+                <div>
+                  <div style={{ fontSize: 10, color: 'var(--muted)', letterSpacing: '0.12em', fontWeight: 700, marginBottom: 6 }}>TAGS</div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, alignItems: 'center' }}>
+                    {tags.map((t: any) => (
+                      <span key={t.id} style={pillStyle}>{t.name}</span>
+                    ))}
+                    {!showAllTags && totalTags > 5 && (
+                      <span
+                        className="gm-tag-more"
+                        onClick={() => setShowAllTags(true)}
+                        style={{ ...pillStyle, cursor: 'pointer', color: 'var(--muted)', borderStyle: 'dashed' }}
+                      >
+                        +{totalTags - 5} more
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Store links — hide in read-only */}
+              {!readOnly && stores.length > 0 && (
+                <div>
+                  <div style={{ fontSize: 10, color: 'var(--muted)', letterSpacing: '0.12em', fontWeight: 700, marginBottom: 6 }}>BUY</div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
+                    {stores.map((s: any) => (
+                      <a
+                        key={s.store.id}
+                        href={s.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="gm-store-link"
+                        style={{ ...pillStyle, textDecoration: 'none', transition: 'border-color 0.15s, color 0.15s' }}
+                      >
+                        <span style={{ fontSize: 11 }}>{STORE_ICONS[s.store.slug] ?? '🛒'}</span>
+                        {s.store.name}
+                        <span style={{ fontSize: 10, opacity: 0.45 }}>↗</span>
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
+
+            {/* Right column — cover art */}
+            <div style={{
+              width: isMobile ? 110 : 148,
+              flexShrink: 0,
+              borderRadius: isMobile ? '0 20px 0 0' : '0 20px 0 0',
+              overflow: 'hidden',
+              alignSelf: 'stretch',
+            }}>
+              {game.cover
+                ? <img src={game.cover} alt={game.title} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} loading="lazy" decoding="async" />
+                : <div style={{ width: '100%', height: '100%', minHeight: 180, background: 'var(--surface2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 40 }}>🎮</div>
+              }
+            </div>
+
+            {/* Badges overlaid on top of the panel */}
             {readOnly && (
-              <div style={{ position: 'absolute', top: 14, left: 14, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', color: 'var(--muted)', fontSize: 11, fontWeight: 600, padding: '4px 10px', borderRadius: 6, letterSpacing: 0.5 }}>
+              <div style={{ position: 'absolute', top: 12, left: 12, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', color: 'var(--muted)', fontSize: 11, fontWeight: 600, padding: '4px 10px', borderRadius: 6, letterSpacing: 0.5 }}>
                 👁 View Only
               </div>
             )}
-            <button onClick={close} style={{ position: 'absolute', top: 14, right: 14, width: 32, height: 32, borderRadius: '50%', border: 'none', background: 'rgba(0,0,0,0.6)', color: '#fff', cursor: 'pointer', fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)', transition: 'background 0.15s' }}
-              onMouseEnter={e => (e.currentTarget.style.background = 'rgba(0,0,0,0.9)')}
-              onMouseLeave={e => (e.currentTarget.style.background = 'rgba(0,0,0,0.6)')}
+            <button
+              onClick={close}
+              style={{ position: 'absolute', top: 12, right: 12, width: 28, height: 28, borderRadius: '50%', border: 'none', background: 'rgba(0,0,0,0.55)', color: '#fff', cursor: 'pointer', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)', transition: 'background 0.15s', zIndex: 1 }}
+              onMouseEnter={e => (e.currentTarget.style.background = 'rgba(0,0,0,0.85)')}
+              onMouseLeave={e => (e.currentTarget.style.background = 'rgba(0,0,0,0.55)')}
             >✕</button>
           </div>
 
-          {/* Body */}
-          <div style={{ padding: '24px 28px 28px', display: 'flex', flexDirection: 'column', gap: 24 }}>
+          {/* ── Divider ── */}
+          <div style={{ height: 1, background: 'var(--border)', flexShrink: 0 }} />
 
-            {/* Status — editable only */}
+          {/* ── BODY: status / rating / review / actions ── */}
+          <div style={{ padding: isMobile ? '18px 16px 24px' : '22px 24px 26px', display: 'flex', flexDirection: 'column', gap: 22 }}>
+
+            {/* Status — editable */}
             {!readOnly && (
               <Section label="STATUS">
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                   {STATUSES.map(s => (
-                    <button key={s} onClick={() => markDirty(setPendingStatus)(s)} style={{ padding: '8px 18px', borderRadius: 8, border: 'none', background: pendingStatus === s ? STATUS_COLORS[s] : 'var(--surface2)', color: pendingStatus === s ? (s === 'unplayed' ? '#fff' : '#000') : 'var(--muted)', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', transition: 'all 0.15s', transform: pendingStatus === s ? 'scale(1.05)' : 'scale(1)', boxShadow: pendingStatus === s ? `0 4px 16px ${STATUS_COLORS[s]}55` : 'none' }}>
+                    <button key={s} onClick={() => markDirty(setPendingStatus)(s)} style={{ padding: '8px 16px', borderRadius: 8, border: 'none', background: pendingStatus === s ? STATUS_COLORS[s] : 'var(--surface2)', color: pendingStatus === s ? (s === 'unplayed' ? '#fff' : '#000') : 'var(--muted)', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', transition: 'all 0.15s', transform: pendingStatus === s ? 'scale(1.05)' : 'scale(1)', boxShadow: pendingStatus === s ? `0 4px 16px ${STATUS_COLORS[s]}55` : 'none' }}>
                       {STATUS_LABELS[s]}
                     </button>
                   ))}
@@ -131,7 +313,7 @@ export function GameModal({ game, onClose, readOnly = false }: { game: CabinetGa
               </Section>
             )}
 
-            {/* Status — read only badge */}
+            {/* Status — read-only badge */}
             {readOnly && (
               <Section label="STATUS">
                 <span style={{ display: 'inline-block', background: STATUS_COLORS[game.status], color: game.status === 'unplayed' ? '#fff' : '#000', fontSize: 13, fontWeight: 700, padding: '6px 14px', borderRadius: 8 }}>
@@ -142,30 +324,30 @@ export function GameModal({ game, onClose, readOnly = false }: { game: CabinetGa
 
             {/* Rating — editable */}
             {!readOnly && (
-              <Section label="RATING">
+              <Section label="YOUR RATING">
                 <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
                   {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => (
-                    <button key={n} onClick={() => markDirty(setPendingRating)(pendingRating === n ? null : n)} style={{ width: 38, height: 38, borderRadius: 8, border: 'none', background: (pendingRating ?? 0) >= n ? 'var(--accent)' : 'var(--surface2)', color: (pendingRating ?? 0) >= n ? '#000' : 'var(--muted)', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', transition: 'all 0.12s', transform: (pendingRating ?? 0) >= n ? 'scale(1.1)' : 'scale(1)' }}>
+                    <button key={n} onClick={() => markDirty(setPendingRating)(pendingRating === n ? null : n)} style={{ width: 36, height: 36, borderRadius: 7, border: 'none', background: (pendingRating ?? 0) >= n ? 'var(--accent)' : 'var(--surface2)', color: (pendingRating ?? 0) >= n ? '#000' : 'var(--muted)', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', transition: 'all 0.12s', transform: (pendingRating ?? 0) >= n ? 'scale(1.08)' : 'scale(1)' }}>
                       {n}
                     </button>
                   ))}
                   {pendingRating && (
-                    <span style={{ marginLeft: 8, fontFamily: 'Bebas Neue', fontSize: 28, color: 'var(--accent)', letterSpacing: 1 }}>{pendingRating}/10</span>
+                    <span style={{ marginLeft: 6, fontFamily: 'Bebas Neue', fontSize: 26, color: 'var(--accent)', letterSpacing: 1 }}>{pendingRating}/10</span>
                   )}
                 </div>
               </Section>
             )}
 
-            {/* Rating — read only */}
+            {/* Rating — read-only */}
             {readOnly && game.rating && (
               <Section label="RATING">
                 <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
                   {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => (
-                    <div key={n} style={{ width: 38, height: 38, borderRadius: 8, background: (game.rating ?? 0) >= n ? 'var(--accent)' : 'var(--surface2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: (game.rating ?? 0) >= n ? '#000' : 'var(--muted)', fontSize: 14, fontWeight: 700 }}>
+                    <div key={n} style={{ width: 36, height: 36, borderRadius: 7, background: (game.rating ?? 0) >= n ? 'var(--accent)' : 'var(--surface2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: (game.rating ?? 0) >= n ? '#000' : 'var(--muted)', fontSize: 13, fontWeight: 700 }}>
                       {n}
                     </div>
                   ))}
-                  <span style={{ marginLeft: 8, fontFamily: 'Bebas Neue', fontSize: 28, color: 'var(--accent)', letterSpacing: 1 }}>{game.rating}/10</span>
+                  <span style={{ marginLeft: 6, fontFamily: 'Bebas Neue', fontSize: 26, color: 'var(--accent)', letterSpacing: 1 }}>{game.rating}/10</span>
                 </div>
               </Section>
             )}
@@ -187,7 +369,6 @@ export function GameModal({ game, onClose, readOnly = false }: { game: CabinetGa
                 </div>
               )
             }>
-              {/* Always show rendered markdown in view mode */}
               {(!editMode || readOnly) && (
                 <div className="review-markdown" style={{ minHeight: 80, padding: '12px 14px', background: 'var(--surface2)', borderRadius: 10, border: '1px solid var(--border)' }}>
                   {(readOnly ? game.review : pendingReview)
@@ -198,7 +379,6 @@ export function GameModal({ game, onClose, readOnly = false }: { game: CabinetGa
                   }
                 </div>
               )}
-              {/* Edit textarea — only when not readOnly and in edit mode */}
               {!readOnly && editMode && (
                 <div>
                   <textarea
@@ -223,7 +403,7 @@ export function GameModal({ game, onClose, readOnly = false }: { game: CabinetGa
                 disabled={!dirty}
                 style={{ width: '100%', padding: '12px 20px', borderRadius: 10, border: 'none', background: dirty ? 'var(--accent)' : 'var(--surface2)', color: dirty ? '#000' : 'var(--muted)', fontWeight: 700, fontSize: 14, cursor: dirty ? 'pointer' : 'not-allowed', fontFamily: 'DM Sans, sans-serif', transition: 'all 0.2s', boxShadow: dirty ? '0 4px 20px rgba(232,255,71,0.25)' : 'none' }}
               >
-                {dirty ? '✓ Confirm Changes' : 'No changes'}
+                {dirty ? '✓ Save changes' : 'No changes'}
               </button>
             )}
 
