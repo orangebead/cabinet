@@ -90,7 +90,6 @@ export function GameModal({ game, onClose, readOnly = false }: { game: CabinetGa
   const platforms = details?.platforms?.map((p: any) => p.platform) ?? []
   const tags = details?.tags?.slice(0, showAllTags ? 20 : 5) ?? []
   const totalTags = details?.tags?.length ?? 0
-  const stores = details?.stores ?? []
 
   const otherLists: GameList[] = (['cabinet', 'backlog', 'wishlist'] as GameList[]).filter(l => l !== game.list)
   const listStyles: Record<GameList, { bg: string; color: string; border: string }> = {
