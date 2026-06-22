@@ -39,7 +39,7 @@ export function AuthPage() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: window.location.origin, // returns to your app after Google login
+        redirectTo: window.location.origin,
       },
     })
     if (error) { setError(error.message); setGoogleLoading(false) }

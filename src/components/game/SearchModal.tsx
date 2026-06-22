@@ -117,7 +117,13 @@ export function SearchModal({ onClose, userId }: Props) {
         </div>
 
         {/* Results */}
-        <div style={{ overflowY: 'auto', flex: 1 }}>
+        <div style={{
+          overflowY: 'auto',
+          flex: 1,
+          minHeight: 0,                     /* Fixes flexbox scrolling overflow issues */
+          WebkitOverflowScrolling: 'touch', /* Enables smooth momentum scrolling on iOS */
+          overscrollBehavior: 'contain'     /* Prevents the background page from scrolling instead */
+        }}>
           {query.length < 2 && (
             <div style={{ padding: '48px 20px', color: 'var(--muted)', textAlign: 'center', fontSize: 14 }}>
               <div style={{ fontSize: 36, marginBottom: 12 }}>🎮</div>
