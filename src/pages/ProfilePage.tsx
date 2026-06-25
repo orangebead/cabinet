@@ -487,7 +487,7 @@ export function ProfilePage({ username, onViewCabinet }: Props) {
 
   const [profile, setProfile] = useState<Profile | null>(null)
   const [games, setGames] = useState<CabinetGame[]>([])
-  const [followerCount, setFollowerCount] = useState(0)
+  const [, setFollowerCount] = useState(0)
   const [followingCount, setFollowingCount] = useState(0)
   const [following, setFollowing] = useState(false)
   const [followingList, setFollowingList] = useState<Profile[]>([])
