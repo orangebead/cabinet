@@ -10,6 +10,248 @@ interface Props {
   onViewCabinet?: (userId: string, username: string) => void
 }
 
+// ── Shared stat helpers ────────────────────────────────────────────────────────
+function deriveStats(games: CabinetGame[]) {
+  const cabinet = games.filter(g => g.list === 'cabinet')
+  const backlog  = games.filter(g => g.list === 'backlog').length
+  const wishlist = games.filter(g => g.list === 'wishlist').length
+  const total    = cabinet.length
+  const completed = cabinet.filter(g => g.status === 'completed' || g.status === 'hundred_percent').length
+  const completionPct = total > 0 ? Math.round((completed / total) * 100) : 0
+  const rated    = cabinet.filter(g => g.rating)
+  const avgRating = rated.length
+    ? (rated.reduce((s, g) => s + g.rating!, 0) / rated.length).toFixed(1)
+    : null
+  return { cabinet, total, backlog, wishlist, completed, completionPct, avgRating }
+}
+
+// ── Status bar — coloured segmented bar ──────────────────────────────────────
+const STATUS_ORDER: GameStatus[] = ['in_progress', 'completed', 'hundred_percent', 'unplayed']
+
+function StatusBar({ games }: { games: CabinetGame[] }) {
+  const total = games.length
+  if (!total) return null
+  return (
+    <div>
+      <div style={{ display: 'flex', height: 6, borderRadius: 4, overflow: 'hidden', gap: 2 }}>
+        {STATUS_ORDER.map(s => {
+          const count = games.filter(g => g.status === s).length
+          if (!count) return null
+          const pct = (count / total) * 100
+          return <div key={s} style={{ flex: pct, background: STATUS_COLORS[s], minWidth: 4, borderRadius: 2 }} title={`${STATUS_LABELS[s]}: ${count}`} />
+        })}
+      </div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 12px', marginTop: 8 }}>
+        {STATUS_ORDER.map(s => {
+          const count = games.filter(g => g.status === s).length
+          if (!count) return null
+          return (
+            <div key={s} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+              <div style={{ width: 7, height: 7, borderRadius: 2, background: STATUS_COLORS[s], flexShrink: 0 }} />
+              <span style={{ fontSize: 11, color: 'var(--muted)' }}>{STATUS_LABELS[s]}</span>
+              <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text)' }}>{count}</span>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+// ── Profile hero — shared between own + friend views ─────────────────────────
+function ProfileHero({
+  profile, stats, isMobile, isOwn, following,
+  onFollow, onViewCabinet,
+  editingBio, bioText, setBioText, onSaveBio, onCancelBio, onStartEditBio,
+  onTogglePublic,
+}: {
+  profile: Profile
+  stats: ReturnType<typeof deriveStats>
+  isMobile: boolean
+  isOwn: boolean
+  following?: boolean
+  onFollow?: () => void
+  onViewCabinet?: () => void
+  editingBio?: boolean
+  bioText?: string
+  setBioText?: (s: string) => void
+  onSaveBio?: () => void
+  onCancelBio?: () => void
+  onStartEditBio?: () => void
+  onTogglePublic?: () => void
+}) {
+  const initial = (profile.display_name || profile.username)[0].toUpperCase()
+  const pad = isMobile ? '20px 16px 0' : '32px 40px 0'
+
+  return (
+    <div style={{ padding: pad, borderBottom: '1px solid var(--border)' }}>
+
+      {/* ── Top row: avatar + name + follow ── */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, marginBottom: 20, flexWrap: isMobile ? 'wrap' : 'nowrap' }}>
+
+        {/* Avatar */}
+        <div style={{
+          width: isMobile ? 60 : 72, height: isMobile ? 60 : 72,
+          borderRadius: '50%', background: 'var(--accent)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontFamily: 'Bebas Neue', fontSize: isMobile ? 28 : 34,
+          color: '#000', flexShrink: 0,
+        }}>
+          {initial}
+        </div>
+
+        {/* Name block */}
+        <div style={{ flex: 1, minWidth: 0, paddingTop: 2 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            <h1 style={{ margin: 0, fontFamily: 'Bebas Neue', fontSize: isMobile ? 28 : 34, letterSpacing: 1, lineHeight: 1 }}>
+              {profile.display_name || profile.username}
+            </h1>
+            {!profile.is_public && (
+              <span style={{ background: 'var(--surface2)', border: '1px solid var(--border)', color: 'var(--muted)', fontSize: 10, padding: '2px 7px', borderRadius: 4, fontWeight: 600 }}>
+                Private
+              </span>
+            )}
+          </div>
+          <div style={{ color: 'var(--muted)', fontSize: 13, marginTop: 3 }}>@{profile.username}</div>
+        </div>
+
+        {/* Follow button — top-right, friend profiles only */}
+        {!isOwn && onFollow && (
+          <button
+            onClick={onFollow}
+            style={{ padding: '8px 18px', borderRadius: 8, border: following ? '1px solid var(--border)' : 'none', background: following ? 'transparent' : 'var(--accent)', color: following ? 'var(--muted)' : '#000', fontWeight: 700, fontSize: 13, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', transition: 'all 0.15s', flexShrink: 0 }}
+            onMouseEnter={e => { if (following) { e.currentTarget.style.color = '#f87171'; e.currentTarget.style.borderColor = '#f87171' } }}
+            onMouseLeave={e => { if (following) { e.currentTarget.style.color = 'var(--muted)'; e.currentTarget.style.borderColor = 'var(--border)' } }}
+          >
+            {following ? 'Unfollow' : 'Follow'}
+          </button>
+        )}
+      </div>
+
+      {/* ── Bio ── */}
+      <div style={{ marginBottom: 20 }}>
+        {isOwn && editingBio ? (
+          <div>
+            <textarea
+              value={bioText}
+              onChange={e => setBioText?.(e.target.value)}
+              placeholder="Write a short bio…"
+              rows={3}
+              style={{ width: '100%', background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text)', fontSize: 13, padding: '10px 12px', outline: 'none', resize: 'none', fontFamily: 'DM Sans, sans-serif', boxSizing: 'border-box' }}
+            />
+            <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+              <button onClick={onSaveBio} style={{ padding: '7px 16px', borderRadius: 7, border: 'none', background: 'var(--accent)', color: '#000', fontWeight: 700, fontSize: 12, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>Save</button>
+              <button onClick={onCancelBio} style={{ padding: '7px 16px', borderRadius: 7, border: '1px solid var(--border)', background: 'transparent', color: 'var(--muted)', fontSize: 12, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>Cancel</button>
+            </div>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+            <p style={{ margin: 0, fontSize: 13, color: profile.bio ? 'var(--text)' : 'var(--muted)', lineHeight: 1.6, flex: 1, fontStyle: profile.bio ? 'normal' : 'italic' }}>
+              {profile.bio || (isOwn ? 'No bio yet.' : 'No bio.')}
+            </p>
+            {isOwn && (
+              <button onClick={onStartEditBio} style={{ padding: '4px 10px', borderRadius: 6, border: '1px solid var(--border)', background: 'transparent', color: 'var(--muted)', fontSize: 11, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', flexShrink: 0, transition: 'all 0.15s' }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface2)'; e.currentTarget.style.color = 'var(--text)' }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--muted)' }}
+              >Edit</button>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* ── Stats strip ── */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : `repeat(${isOwn ? 4 : 3}, 1fr)`,
+        borderTop: '1px solid var(--border)',
+        borderLeft: '1px solid var(--border)',
+        borderRadius: 10,
+        overflow: 'hidden',
+        marginBottom: 20,
+      }}>
+        {[
+          { label: 'In Cabinet', value: stats.total },
+          { label: 'Completion', value: `${stats.completionPct}%` },
+          { label: 'Avg Rating', value: stats.avgRating ?? '—' },
+          ...(isOwn ? [{ label: 'Backlog', value: stats.backlog }] : []),
+        ].map((s, i) => (
+          <div key={s.label} style={{ padding: isMobile ? '14px 8px' : '16px 12px', textAlign: 'center', borderRight: '1px solid var(--border)', borderBottom: '1px solid var(--border)', background: 'var(--surface)' }}>
+            <div style={{ fontFamily: 'Bebas Neue', fontSize: isMobile ? 24 : 28, letterSpacing: 1, color: i === 1 && stats.completionPct === 100 ? 'var(--accent)' : 'var(--text)', lineHeight: 1 }}>
+              {s.value}
+            </div>
+            <div style={{ color: 'var(--muted)', fontSize: 10, marginTop: 4, fontWeight: 600, letterSpacing: 0.5, textTransform: 'uppercase' }}>
+              {s.label}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* ── Status bar ── */}
+      {stats.total > 0 && (
+        <div style={{ marginBottom: 20 }}>
+          <StatusBar games={stats.cabinet} />
+        </div>
+      )}
+
+      {/* ── View Cabinet — full width, below stats, friend profiles only ── */}
+      {!isOwn && profile.is_public && onViewCabinet && (
+        <button
+          onClick={onViewCabinet}
+          style={{ width: '100%', padding: '11px', borderRadius: 9, border: '1px solid var(--border)', background: 'transparent', color: 'var(--text)', fontWeight: 600, fontSize: 13, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', transition: 'background 0.15s', marginBottom: 20 }}
+          onMouseEnter={e => (e.currentTarget.style.background = 'var(--surface2)')}
+          onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+        >
+          View Cabinet →
+        </button>
+      )}
+
+      {/* ── Own profile: public toggle ── */}
+      {isOwn && (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: 16 }}>
+          <span style={{ color: 'var(--muted)', fontSize: 12 }}>Public profile</span>
+          <div
+            onClick={onTogglePublic}
+            style={{ width: 36, height: 20, borderRadius: 10, background: profile.is_public ? 'var(--accent)' : 'var(--surface2)', border: '1px solid var(--border)', position: 'relative', cursor: 'pointer', transition: 'background 0.2s' }}
+          >
+            <div style={{ position: 'absolute', top: 2, left: profile.is_public ? 17 : 2, width: 14, height: 14, borderRadius: '50%', background: profile.is_public ? '#000' : 'var(--muted)', transition: 'left 0.2s' }} />
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── Cabinet grid ──────────────────────────────────────────────────────────────
+function CabinetGrid({ games, isMobile }: { games: CabinetGame[]; isMobile: boolean }) {
+  if (games.length === 0) return (
+    <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--muted)' }}>
+      <div style={{ fontSize: 36, marginBottom: 10 }}>🎮</div>
+      <div style={{ fontSize: 14 }}>No games yet.</div>
+    </div>
+  )
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(isMobile ? 90px : 110px, 1fr))'.replace('isMobile ? 90px : 110px', isMobile ? '90px' : '110px'), gap: 8 }}>
+      {games.map(game => (
+        <div key={game.id} style={{ position: 'relative', borderRadius: 8, overflow: 'hidden', border: '1px solid var(--border)', aspectRatio: '3/4' }}>
+          {game.cover
+            ? <img src={game.cover} alt={game.title} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+            : <div style={{ width: '100%', height: '100%', background: 'var(--surface2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>🎮</div>
+          }
+          <div style={{ position: 'absolute', top: 5, left: 5, background: STATUS_COLORS[game.status], color: game.status === 'unplayed' ? '#fff' : '#000', fontSize: 8, fontWeight: 700, padding: '2px 5px', borderRadius: 3 }}>
+            {STATUS_LABELS[game.status]}
+          </div>
+          {game.rating && (
+            <div style={{ position: 'absolute', top: 5, right: 5, background: 'rgba(0,0,0,0.8)', color: 'var(--accent)', fontSize: 10, fontWeight: 700, padding: '2px 5px', borderRadius: 3, fontFamily: 'Bebas Neue' }}>
+              {game.rating}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  )
+}
+
+// ── ProfilePage ───────────────────────────────────────────────────────────────
 export function ProfilePage({ username, onViewCabinet }: Props) {
   const { user } = useAuthStore()
   const {
@@ -19,16 +261,16 @@ export function ProfilePage({ username, onViewCabinet }: Props) {
   } = useProfileStore()
   const isMobile = useIsMobile()
 
-  const [profile, setProfile] = useState<Profile | null>(null)
-  const [games, setGames] = useState<CabinetGame[]>([])
+  const [profile, setProfile]           = useState<Profile | null>(null)
+  const [games, setGames]               = useState<CabinetGame[]>([])
   const [followerCount, setFollowerCount] = useState(0)
   const [followingCount, setFollowingCount] = useState(0)
-  const [following, setFollowing] = useState(false)
+  const [following, setFollowing]       = useState(false)
   const [followingList, setFollowingList] = useState<Profile[]>([])
-  const [loading, setLoading] = useState(true)
-  const [editingBio, setEditingBio] = useState(false)
-  const [bioText, setBioText] = useState('')
-  const [activeTab, setActiveTab] = useState<'games' | 'following'>('games')
+  const [loading, setLoading]           = useState(true)
+  const [editingBio, setEditingBio]     = useState(false)
+  const [bioText, setBioText]           = useState('')
+  const [activeTab, setActiveTab]       = useState<'games' | 'following'>('games')
 
   const isOwn = !username || username === ownProfile?.username
 
@@ -63,15 +305,8 @@ export function ProfilePage({ username, onViewCabinet }: Props) {
 
   const handleFollow = async () => {
     if (!user || !profile) return
-    if (following) {
-      await unfollow(user.id, profile.id)
-      setFollowing(false)
-      setFollowerCount(c => c - 1)
-    } else {
-      await follow(user.id, profile.id)
-      setFollowing(true)
-      setFollowerCount(c => c + 1)
-    }
+    if (following) { await unfollow(user.id, profile.id); setFollowing(false); setFollowerCount(c => c - 1) }
+    else           { await follow(user.id, profile.id);   setFollowing(true);  setFollowerCount(c => c + 1) }
   }
 
   const saveBio = async () => {
@@ -97,206 +332,46 @@ export function ProfilePage({ username, onViewCabinet }: Props) {
     </div>
   )
 
-  const cabinetGames = games.filter(g => g.list === 'cabinet')
-  const total = cabinetGames.length
-  const completed = cabinetGames.filter(g => g.status === 'completed' || g.status === 'hundred_percent').length
-  const completionPct = total > 0 ? Math.round((completed / total) * 100) : 0
-  const avgRating = (() => {
-    const rated = cabinetGames.filter(g => g.rating)
-    if (!rated.length) return null
-    return (rated.reduce((sum, g) => sum + g.rating!, 0) / rated.length).toFixed(1)
-  })()
-
-  const initial = (profile.display_name || profile.username)[0].toUpperCase()
+  const stats = deriveStats(games)
   const pad = isMobile ? '20px 16px' : '32px 40px'
 
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
 
-      {/* ── Profile card ───────────────────────────────────── */}
-      <div style={{ padding: pad, borderBottom: '1px solid var(--border)' }}>
-        <div style={{ maxWidth: 600 }}>
+      <ProfileHero
+        profile={profile}
+        stats={stats}
+        isMobile={isMobile}
+        isOwn={isOwn}
+        following={following}
+        onFollow={handleFollow}
+        onViewCabinet={onViewCabinet ? () => onViewCabinet(profile.id, profile.username) : undefined}
+        editingBio={editingBio}
+        bioText={bioText}
+        setBioText={setBioText}
+        onSaveBio={saveBio}
+        onCancelBio={() => { setBioText(profile.bio ?? ''); setEditingBio(false) }}
+        onStartEditBio={() => setEditingBio(true)}
+        onTogglePublic={() => user && updateProfile(user.id, { is_public: !profile.is_public }).then(() => setProfile(p => p ? { ...p, is_public: !p.is_public } : p))}
+      />
 
-          {/* Top: avatar + name + actions */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 16 }}>
-            {/* Avatar */}
-            <div style={{ width: isMobile ? 56 : 68, height: isMobile ? 56 : 68, borderRadius: '50%', background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Bebas Neue', fontSize: isMobile ? 26 : 32, color: '#000', flexShrink: 0 }}>
-              {initial}
-            </div>
-
-            {/* Name + username */}
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                <h1 style={{ margin: 0, fontFamily: 'Bebas Neue', fontSize: isMobile ? 26 : 30, letterSpacing: 1, lineHeight: 1 }}>
-                  {profile.display_name || profile.username}
-                </h1>
-                {!profile.is_public && (
-                  <span style={{ background: 'var(--surface2)', border: '1px solid var(--border)', color: 'var(--muted)', fontSize: 10, padding: '2px 7px', borderRadius: 4, fontWeight: 600, flexShrink: 0 }}>Private</span>
-                )}
-              </div>
-              <div style={{ color: 'var(--muted)', fontSize: 13, marginTop: 2 }}>@{profile.username}</div>
-            </div>
-
-            {/* Follow button — other profiles only */}
-            {!isOwn && user && (
-              <button
-                onClick={handleFollow}
-                style={{ padding: '8px 18px', borderRadius: 8, border: following ? '1px solid var(--border)' : 'none', background: following ? 'transparent' : 'var(--accent)', color: following ? 'var(--muted)' : '#000', fontWeight: 700, fontSize: 13, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', transition: 'all 0.15s', flexShrink: 0 }}
-                onMouseEnter={e => { if (following) { e.currentTarget.style.color = '#f87171'; e.currentTarget.style.borderColor = '#f87171' } }}
-                onMouseLeave={e => { if (following) { e.currentTarget.style.color = 'var(--muted)'; e.currentTarget.style.borderColor = 'var(--border)' } }}
-              >
-                {following ? 'Unfollow' : 'Follow'}
-              </button>
-            )}
-          </div>
-
-          {/* Bio */}
-          <div style={{ marginBottom: 16 }}>
-            {isOwn && editingBio ? (
-              <div>
-                <textarea
-                  value={bioText}
-                  onChange={e => setBioText(e.target.value)}
-                  placeholder="Write something about yourself..."
-                  maxLength={160}
-                  rows={2}
-                  style={{ width: '100%', padding: '9px 12px', background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text)', fontSize: 13, outline: 'none', resize: 'none', fontFamily: 'DM Sans, sans-serif', boxSizing: 'border-box' }}
-                  onFocus={e => (e.target.style.borderColor = 'var(--muted)')}
-                  onBlur={e => (e.target.style.borderColor = 'var(--border)')}
-                />
-                <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-                  <SmBtn label="Save" accent onClick={saveBio} />
-                  <SmBtn label="Cancel" onClick={() => { setEditingBio(false); setBioText(profile.bio ?? '') }} />
-                </div>
-              </div>
-            ) : (
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-                <p style={{ margin: 0, color: profile.bio ? 'var(--text)' : 'var(--muted)', fontSize: 13, fontStyle: profile.bio ? 'normal' : 'italic', lineHeight: 1.5, flex: 1 }}>
-                  {profile.bio ?? (isOwn ? 'No bio yet.' : '')}
-                </p>
-                {isOwn && <SmBtn label="Edit" onClick={() => setEditingBio(true)} />}
-              </div>
-            )}
-          </div>
-
-          {/* Stats row */}
-          <div style={{ display: 'flex', gap: 0, background: 'var(--surface2)', borderRadius: 10, border: '1px solid var(--border)', overflow: 'hidden' }}>
-            {[
-              { label: 'Games', value: total },
-              { label: 'Done', value: `${completionPct}%` },
-              ...(avgRating ? [{ label: 'Avg', value: avgRating, accent: true }] : []),
-              { label: 'Followers', value: followerCount },
-              { label: 'Following', value: followingCount },
-            ].map((s, i, arr) => (
-              <div key={s.label} style={{ flex: 1, padding: '12px 8px', textAlign: 'center', borderRight: i < arr.length - 1 ? '1px solid var(--border)' : 'none' }}>
-                <div style={{ fontFamily: 'Bebas Neue', fontSize: 20, letterSpacing: 1, color: s.accent ? 'var(--accent)' : 'var(--text)', lineHeight: 1 }}>{s.value}</div>
-                <div style={{ color: 'var(--muted)', fontSize: 10, marginTop: 3, fontWeight: 600, letterSpacing: 0.5 }}>{s.label}</div>
-              </div>
-            ))}
-          </div>
-
-          {/* Own profile controls */}
-          {isOwn && (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 14 }}>
-              <span style={{ color: 'var(--muted)', fontSize: 12 }}>Public profile</span>
-              <div
-                onClick={() => user && updateProfile(user.id, { is_public: !profile.is_public }).then(() => setProfile(p => p ? { ...p, is_public: !p.is_public } : p))}
-                style={{ width: 36, height: 20, borderRadius: 10, background: profile.is_public ? 'var(--accent)' : 'var(--surface2)', border: '1px solid var(--border)', position: 'relative', cursor: 'pointer', transition: 'background 0.2s' }}
-              >
-                <div style={{ position: 'absolute', top: 2, left: profile.is_public ? 17 : 2, width: 14, height: 14, borderRadius: '50%', background: profile.is_public ? '#000' : 'var(--muted)', transition: 'left 0.2s' }} />
-              </div>
-            </div>
-          )}
-
-          {/* View cabinet button — other profiles */}
-          {!isOwn && profile.is_public && onViewCabinet && (
-            <button
-              onClick={() => onViewCabinet(profile.id, profile.username)}
-              style={{ marginTop: 14, width: '100%', padding: '10px', borderRadius: 9, border: '1px solid var(--border)', background: 'transparent', color: 'var(--text)', fontWeight: 600, fontSize: 13, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', transition: 'background 0.15s' }}
-              onMouseEnter={e => (e.currentTarget.style.background = 'var(--surface2)')}
-              onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-            >
-              View Cabinet →
-            </button>
-          )}
-        </div>
+      {/* ── Tabs ── */}
+      <div style={{ borderBottom: '1px solid var(--border)', display: 'flex', padding: '0 16px' }}>
+        {(['games', 'following'] as const).map(tab => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            style={{ padding: '14px 20px', border: 'none', background: 'transparent', color: activeTab === tab ? 'var(--text)' : 'var(--muted)', fontWeight: activeTab === tab ? 700 : 400, fontSize: 13, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', borderBottom: activeTab === tab ? '2px solid var(--accent)' : '2px solid transparent', transition: 'all 0.15s' }}
+          >
+            {tab === 'games' ? `Games (${stats.total})` : `Following (${followingCount})`}
+          </button>
+        ))}
       </div>
 
-      {/* ── Tabs ───────────────────────────────────────────── */}
-      <div style={{ padding: '0 16px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'center' }}>
-        <div style={{ display: 'flex', gap: 0, width: '100%', maxWidth: 400 }}>
-          {(['games', 'following'] as const).map(tab => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              style={{
-                flex: 1, padding: '14px 0', border: 'none', background: 'transparent',
-                color: activeTab === tab ? 'var(--text)' : 'var(--muted)',
-                fontWeight: activeTab === tab ? 700 : 400,
-                fontSize: 13, cursor: 'pointer',
-                fontFamily: 'DM Sans, sans-serif',
-                borderBottom: activeTab === tab ? '2px solid var(--accent)' : '2px solid transparent',
-                transition: 'all 0.15s',
-              }}
-            >
-              {tab === 'games' ? `Games (${total})` : `Following (${followingCount})`}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* ── Tab content ────────────────────────────────────── */}
+      {/* ── Tab content ── */}
       <div style={{ padding: pad, flex: 1 }}>
+        {activeTab === 'games' && <CabinetGrid games={stats.cabinet} isMobile={isMobile} />}
 
-        {/* Games tab */}
-        {activeTab === 'games' && (
-          <>
-            {/* Status chips */}
-            {total > 0 && (
-              <div style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
-                {(['unplayed', 'in_progress', 'completed', 'hundred_percent'] as GameStatus[]).map(s => {
-                  const count = cabinetGames.filter(g => g.status === s).length
-                  if (!count) return null
-                  return (
-                    <div key={s} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, padding: '6px 12px' }}>
-                      <div style={{ width: 7, height: 7, borderRadius: 2, background: STATUS_COLORS[s], flexShrink: 0 }} />
-                      <span style={{ color: 'var(--muted)', fontSize: 11 }}>{STATUS_LABELS[s]}</span>
-                      <span style={{ fontWeight: 700, fontSize: 12 }}>{count}</span>
-                    </div>
-                  )
-                })}
-              </div>
-            )}
-
-            {total === 0 ? (
-              <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--muted)' }}>
-                <div style={{ fontSize: 36, marginBottom: 10 }}>🎮</div>
-                <div style={{ fontSize: 14 }}>{isOwn ? 'Your cabinet is empty.' : 'No games yet.'}</div>
-              </div>
-            ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: 8 }}>
-                {cabinetGames.map(game => (
-                  <div key={game.id} style={{ position: 'relative', borderRadius: 8, overflow: 'hidden', border: '1px solid var(--border)', aspectRatio: '3/4' }}>
-                    {game.cover
-                      ? <img src={game.cover} alt={game.title} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                      : <div style={{ width: '100%', height: '100%', background: 'var(--surface2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>🎮</div>
-                    }
-                    <div style={{ position: 'absolute', top: 5, left: 5, background: STATUS_COLORS[game.status], color: game.status === 'unplayed' ? '#fff' : '#000', fontSize: 8, fontWeight: 700, padding: '2px 5px', borderRadius: 3 }}>
-                      {STATUS_LABELS[game.status]}
-                    </div>
-                    {game.rating && (
-                      <div style={{ position: 'absolute', top: 5, right: 5, background: 'rgba(0,0,0,0.8)', color: 'var(--accent)', fontSize: 10, fontWeight: 700, padding: '2px 5px', borderRadius: 3, fontFamily: 'Bebas Neue' }}>
-                        {game.rating}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </>
-        )}
-
-        {/* Following tab */}
         {activeTab === 'following' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxWidth: 500 }}>
             {followingList.length === 0 ? (
@@ -304,31 +379,33 @@ export function ProfilePage({ username, onViewCabinet }: Props) {
                 <div style={{ fontSize: 36, marginBottom: 10 }}>👥</div>
                 <div style={{ fontSize: 14 }}>{isOwn ? "You're not following anyone yet." : 'Not following anyone.'}</div>
               </div>
-            ) : (
-              followingList.map(p => {
-                const init = (p.display_name || p.username)[0].toUpperCase()
-                return (
-                  <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10 }}>
-                    <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Bebas Neue', fontSize: 16, color: '#000', flexShrink: 0 }}>
-                      {init}
-                    </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontWeight: 600, fontSize: 13, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.display_name || p.username}</div>
-                      <div style={{ color: 'var(--muted)', fontSize: 11 }}>@{p.username}</div>
-                    </div>
-                    {p.is_public && onViewCabinet && (
-                      <SmBtn label="Cabinet" onClick={() => onViewCabinet(p.id, p.username)} />
-                    )}
+            ) : followingList.map(p => {
+              const init = (p.display_name || p.username)[0].toUpperCase()
+              return (
+                <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10 }}>
+                  <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Bebas Neue', fontSize: 16, color: '#000', flexShrink: 0 }}>
+                    {init}
                   </div>
-                )
-              })
-            )}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 600, fontSize: 13, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.display_name || p.username}</div>
+                    <div style={{ color: 'var(--muted)', fontSize: 11 }}>@{p.username}</div>
+                  </div>
+                  {p.is_public && onViewCabinet && (
+                    <SmBtn label="Cabinet" onClick={() => onViewCabinet(p.id, p.username)} />
+                  )}
+                </div>
+              )
+            })}
           </div>
         )}
       </div>
     </div>
   )
 }
+
+// ── FriendCabinetPage — same hero, different content ─────────────────────────
+// Re-exported here so both pages share the ProfileHero component.
+// If you keep FriendCabinetPage.tsx as a separate file, import ProfileHero from a shared file.
 
 function SmBtn({ label, onClick, accent }: { label: string; onClick: () => void; accent?: boolean }) {
   return (

@@ -276,12 +276,7 @@ export function GameModal({ game, onClose, readOnly = false }: { game: CabinetGa
               }
             </div>
 
-            {/* Badges overlaid on top of the panel */}
-            {readOnly && (
-              <div style={{ position: 'absolute', top: 12, left: 12, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', color: 'var(--muted)', fontSize: 11, fontWeight: 600, padding: '4px 10px', borderRadius: 6, letterSpacing: 0.5 }}>
-                View Only
-              </div>
-            )}
+
             <button
               onClick={close}
               style={{ position: 'absolute', top: 12, right: 12, width: 28, height: 28, borderRadius: '50%', border: 'none', background: 'rgba(0,0,0,0.55)', color: '#fff', cursor: 'pointer', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)', transition: 'background 0.15s', zIndex: 1 }}
@@ -307,6 +302,14 @@ export function GameModal({ game, onClose, readOnly = false }: { game: CabinetGa
                   ))}
                 </div>
               </Section>
+            )}
+
+            {/* Read-only notice — inline, never overlaps content */}
+            {readOnly && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 13px', borderRadius: 9, background: 'var(--surface2)', border: '1px solid var(--border)' }}>
+                <span style={{ fontSize: 14 }}>👁</span>
+                <span style={{ fontSize: 12, color: 'var(--muted)', fontWeight: 500 }}>You're viewing this cabinet in read-only mode</span>
+              </div>
             )}
 
             {/* Status — read-only badge */}
