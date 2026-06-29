@@ -13,6 +13,7 @@ import { ProfileSetupPage } from './pages/ProfileSetupPage'
 import { ProfilePage } from './pages/ProfilePage'
 import { SocialPage } from './pages/SocialPage'
 import { FriendCabinetPage } from './pages/FriendCabinetPage'
+import { LandingPage } from './pages/LandingPage'
 
 export type Page =
   | { id: 'cabinet' }
@@ -27,6 +28,7 @@ function App() {
   const { profile, loadingProfile, fetchProfile } = useProfileStore()
   const [page, setPage] = useState<Page>({ id: 'cabinet' })
   const isMobile = useIsMobile()
+  const [showLanding, setShowLanding] = useState(true)
 
   useRealtimeNotifications(user?.id)
 
@@ -35,6 +37,7 @@ function App() {
       setUser(session?.user ?? null)
       setLoading(false)
       if (session?.user) {
+        setShowLanding(false) // active session — skip landing
         fetchGames(session.user.id)
         fetchProfile(session.user.id)
       }
@@ -43,6 +46,7 @@ function App() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null)
       if (session?.user) {
+        setShowLanding(false) // just logged in — skip landing
         fetchGames(session.user.id)
         fetchProfile(session.user.id)
       } else {
@@ -52,6 +56,13 @@ function App() {
 
     return () => subscription.unsubscribe()
   }, [])
+
+  // ── Landing — shown first to unauthenticated users ─────────────────────────
+  // Must be before the loading check so it renders immediately on first visit
+  // without waiting for Supabase to resolve the session.
+  if (showLanding && !user && !loading) {
+    return <LandingPage onEnter={() => setShowLanding(false)} />
+  }
 
   if (loading) return <Splash />
   if (!user) return <AuthPage />
@@ -67,7 +78,7 @@ function App() {
       <div style={{
         marginLeft: isMobile ? 0 : 220,
         flex: 1, minWidth: 0,
-        paddingBottom: isMobile ? 70 : 0, // space for bottom nav
+        paddingBottom: isMobile ? 70 : 0,
       }}>
         <div style={{ display: !isDynamic && page.id === 'cabinet' ? 'block' : 'none' }}>
           <CabinetPage />
