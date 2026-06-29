@@ -35,7 +35,7 @@ export function GameCard({ game }: Props) {
             {STATUS_LABELS[game.status]}
           </div>
           {game.rating && (
-            <div style={{ position: 'absolute', top: 8, right: 8, background: 'rgba(0,0,0,0.8)', color: 'var(--accent)', fontSize: 13, fontWeight: 700, padding: '3px 8px', borderRadius: 4, fontFamily: 'Bebas Neue', letterSpacing: 1 }}>
+            <div style={{ position: 'absolute', top: 8, right: 8, background: 'rgba(0,0,0,0.8)', color: 'var(--accent)', fontSize: 13, fontWeight: 700, padding: '3px 8px', borderRadius: 4, fontFamily: 'Space Grotesk', letterSpacing: 1 }}>
               {game.rating}/10
             </div>
           )}
@@ -64,7 +64,7 @@ export function GameCard({ game }: Props) {
 // function Section({ label, children }: { label: React.ReactNode; children: React.ReactNode }) {
 //   return (
 //     <div>
-//       <div style={{ color: 'var(--muted)', fontSize: 10, letterSpacing: 2, fontWeight: 700, marginBottom: 10 }}>
+//       <div style={{ color: 'var(--muted)', fontSize: 10, letterSpacing: 1, fontWeight: 700, marginBottom: 10 }}>
 //         {label}
 //       </div>
 //       {children}

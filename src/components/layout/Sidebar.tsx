@@ -49,8 +49,7 @@ export function Sidebar({ currentPage, onNavigate }: Props) {
       <aside style={{ position: 'fixed', top: 0, left: 0, width: 220, height: '100vh', background: 'var(--surface)', borderRight: '1px solid var(--border)', display: 'flex', flexDirection: 'column', zIndex: 50, overflow: 'hidden' }}>
 
         <div style={{ padding: '28px 24px 20px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
-          <div style={{ fontFamily: 'Bebas Neue', fontSize: 32, letterSpacing: 3, color: 'var(--accent)', lineHeight: 1 }}>CABINET</div>
-          <div style={{ color: 'var(--muted)', fontSize: 11, marginTop: 4, letterSpacing: 1 }}>YOUR GAME SHELF</div>
+          <div style={{ fontFamily: 'Space Grotesk', fontSize: 32, letterSpacing: 1, color: 'var(--accent)', lineHeight: 1 }}>Cabinet</div>
         </div>
 
         <nav style={{ padding: '16px 12px', flex: 1, display: 'flex', flexDirection: 'column' }}>
@@ -132,11 +131,11 @@ function PrivacyModal({ onClose }: PrivacyModalProps) {
           background: 'var(--surface)', border: '1px solid var(--border)',
           borderRadius: 16, width: '100%', maxWidth: 440,
           padding: 24, display: 'flex', flexDirection: 'column',
-          boxShadow: '0 32px 80px rgba(0,0,0,0.6)', fontFamily: 'DM Sans, sans-serif'
+          boxShadow: '0 32px 80px rgba(0,0,0,0.6)', fontFamily: 'Rethink Sans, sans-serif'
         }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-          <h3 style={{ margin: 0, fontFamily: 'Bebas Neue', fontSize: 24, letterSpacing: 1.5, color: 'var(--text)' }}>
+          <h3 style={{ margin: 0, fontFamily: 'Space Grotesk', fontSize: 24, letterSpacing: 0.1, color: 'var(--accent)' }}>
             Privacy & Security
           </h3>
           <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer', fontSize: 18 }}>✕</button>
@@ -166,7 +165,7 @@ function PrivacyModal({ onClose }: PrivacyModalProps) {
             marginTop: 20, padding: '10px 0', borderRadius: 8,
             background: 'var(--surface2)', color: 'var(--text)', fontWeight: 600,
             fontSize: 13, cursor: 'pointer', border: '1px solid var(--border)',
-            transition: 'all 0.15s', fontFamily: 'DM Sans, sans-serif'
+            transition: 'all 0.15s', fontFamily: 'Rethink Sans, sans-serif'
           }}
           onMouseEnter={e => (e.currentTarget.style.background = 'var(--border)')}
           onMouseLeave={e => (e.currentTarget.style.background = 'var(--surface2)')}

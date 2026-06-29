@@ -20,7 +20,7 @@ export function ProgressBar() {
     <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '18px 20px', marginBottom: 24 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
         <span style={{ fontSize: 11, letterSpacing: 1.5, color: 'var(--muted)', fontWeight: 600 }}>COLLECTION PROGRESS</span>
-        <span style={{ fontFamily: 'Bebas Neue', fontSize: 22, color: 'var(--accent)', letterSpacing: 1 }}>{completionPct}% COMPLETE</span>
+        <span style={{ fontFamily: 'Space Grotesk', fontSize: 22, color: 'var(--accent)', letterSpacing: 1 }}>{completionPct}% COMPLETE</span>
       </div>
 
       <div style={{ height: 8, borderRadius: 4, background: 'var(--surface2)', overflow: 'hidden', display: 'flex', gap: 1, marginBottom: 12 }}>

@@ -144,7 +144,7 @@ export function GameModal({ game, onClose, readOnly = false }: { game: CabinetGa
         .review-markdown p { margin: 0 0 10px; }
         .review-markdown strong { color: var(--accent); }
         .review-markdown em { color: var(--muted); font-style: italic; }
-        .review-markdown h1, .review-markdown h2, .review-markdown h3 { font-family: 'Bebas Neue'; letter-spacing: 1px; color: var(--text); margin: 12px 0 6px; }
+        .review-markdown h1, .review-markdown h2, .review-markdown h3 { font-family: 'Space Grotesk'; letter-spacing: 1px; color: var(--text); margin: 12px 0 6px; }
         .review-markdown ul, .review-markdown ol { padding-left: 20px; margin: 0 0 10px; }
         .review-markdown li { margin-bottom: 4px; }
         .review-markdown blockquote { border-left: 3px solid var(--accent); padding-left: 12px; color: var(--muted); margin: 10px 0; }
@@ -171,7 +171,7 @@ export function GameModal({ game, onClose, readOnly = false }: { game: CabinetGa
 
               {/* Title + subtitle */}
               <div>
-                <h2 style={{ margin: '0 0 4px', fontFamily: 'Bebas Neue', fontSize: isMobile ? 26 : 30, letterSpacing: 1.2, color: 'var(--text)', lineHeight: 1.05 }}>
+                <h2 style={{ margin: '0 0 4px', fontFamily: 'Space Grotesk', fontSize: isMobile ? 26 : 30, letterSpacing: 0.1, color: 'var(--text)', lineHeight: 1.05 }}>
                   {game.title}
                 </h2>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px 8px', alignItems: 'center' }}>
@@ -191,7 +191,7 @@ export function GameModal({ game, onClose, readOnly = false }: { game: CabinetGa
                     const s = metacriticStyle(metacritic)
                     return (
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <div style={{ width: 42, height: 42, borderRadius: 8, background: s.bg, border: `1px solid ${s.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Bebas Neue', fontSize: 20, color: s.color, letterSpacing: 0.5, flexShrink: 0 }}>
+                        <div style={{ width: 42, height: 42, borderRadius: 8, background: s.bg, border: `1px solid ${s.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Space Grotesk', fontSize: 20, color: s.color, letterSpacing: 0.5, flexShrink: 0 }}>
                           {metacritic}
                         </div>
                         <div>
@@ -331,7 +331,7 @@ export function GameModal({ game, onClose, readOnly = false }: { game: CabinetGa
                     </button>
                   ))}
                   {pendingRating && (
-                    <span style={{ marginLeft: 6, fontFamily: 'Bebas Neue', fontSize: 26, color: 'var(--accent)', letterSpacing: 1 }}>{pendingRating}/10</span>
+                    <span style={{ marginLeft: 6, fontFamily: 'Space Grotesk', fontSize: 26, color: 'var(--accent)', letterSpacing: 1 }}>{pendingRating}/10</span>
                   )}
                 </div>
               </Section>
@@ -346,7 +346,7 @@ export function GameModal({ game, onClose, readOnly = false }: { game: CabinetGa
                       {n}
                     </div>
                   ))}
-                  <span style={{ marginLeft: 6, fontFamily: 'Bebas Neue', fontSize: 26, color: 'var(--accent)', letterSpacing: 1 }}>{game.rating}/10</span>
+                  <span style={{ marginLeft: 6, fontFamily: 'Space Grotesk', fontSize: 26, color: 'var(--accent)', letterSpacing: 1 }}>{game.rating}/10</span>
                 </div>
               </Section>
             )}
@@ -441,7 +441,7 @@ export function GameModal({ game, onClose, readOnly = false }: { game: CabinetGa
 function Section({ label, children }: { label: React.ReactNode; children: React.ReactNode }) {
   return (
     <div>
-      <div style={{ color: 'var(--muted)', fontSize: 10, letterSpacing: 2, fontWeight: 700, marginBottom: 10 }}>{label}</div>
+      <div style={{ color: 'var(--muted)', fontSize: 10, letterSpacing: 1, fontWeight: 700, marginBottom: 10 }}>{label}</div>
       {children}
     </div>
   )

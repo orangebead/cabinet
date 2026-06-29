@@ -24,7 +24,7 @@
 //       >
 //         {/* Header */}
 //         <div style={{ display: 'flex', justifyContent: 'between', alignItems: 'center', marginBottom: 16 }}>
-//           <h3 style={{ margin: 0, fontFamily: 'Bebas Neue', fontSize: 24, letterSpacing: 1.5, color: 'var(--text)' }}>
+//           <h3 style={{ margin: 0, fontFamily: 'Space Grotesk', fontSize: 24, letterSpacing: 1.5, color: 'var(--text)' }}>
 //             Privacy & Security
 //           </h3>
 //           <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer', fontSize: 18 }}>✕</button>

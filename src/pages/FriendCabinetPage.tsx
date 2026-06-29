@@ -48,7 +48,7 @@ export function FriendCabinetPage({ userId, username, onBack }: Props) {
             onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = 'var(--muted)' }}
           >← Back</button>
           <div>
-            <h1 style={{ margin: 0, fontFamily: 'Bebas Neue', fontSize: isMobile ? 26 : 32, letterSpacing: 1.5, lineHeight: 1 }}>
+            <h1 style={{ margin: 0, fontFamily: 'Space Grotesk', fontSize: isMobile ? 26 : 32, letterSpacing: 1.5, lineHeight: 1 }}>
               @{username}'s Cabinet
             </h1>
           </div>
@@ -68,7 +68,7 @@ export function FriendCabinetPage({ userId, username, onBack }: Props) {
                 { label: 'Avg Rating', value: avgRating ?? '—' },
               ].map((s, i) => (
                 <div key={s.label} style={{ padding: isMobile ? '14px 8px' : '16px 12px', textAlign: 'center', borderRight: '1px solid var(--border)', borderBottom: '1px solid var(--border)', background: 'var(--surface)' }}>
-                  <div style={{ fontFamily: 'Bebas Neue', fontSize: isMobile ? 24 : 28, letterSpacing: 1, color: i === 1 && completionPct === 100 ? 'var(--accent)' : 'var(--text)', lineHeight: 1 }}>
+                  <div style={{ fontFamily: 'Space Grotesk', fontSize: isMobile ? 24 : 28, letterSpacing: 1, color: i === 1 && completionPct === 100 ? 'var(--accent)' : 'var(--text)', lineHeight: 1 }}>
                     {s.value}
                   </div>
                   <div style={{ color: 'var(--muted)', fontSize: 10, marginTop: 4, fontWeight: 600, letterSpacing: 0.5, textTransform: 'uppercase' }}>
@@ -138,7 +138,7 @@ export function FriendCabinetPage({ userId, username, onBack }: Props) {
                     {STATUS_LABELS[game.status]}
                   </div>
                   {game.rating && (
-                    <div style={{ position: 'absolute', top: 7, right: 7, background: 'rgba(0,0,0,0.8)', color: 'var(--accent)', fontSize: 11, fontWeight: 700, padding: '2px 6px', borderRadius: 4, fontFamily: 'Bebas Neue' }}>
+                    <div style={{ position: 'absolute', top: 7, right: 7, background: 'rgba(0,0,0,0.8)', color: 'var(--accent)', fontSize: 11, fontWeight: 700, padding: '2px 6px', borderRadius: 4, fontFamily: 'Space Grotesk' }}>
                       {game.rating}/10
                     </div>
                   )}

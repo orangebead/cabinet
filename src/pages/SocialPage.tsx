@@ -152,7 +152,7 @@ export function SocialPage({ onViewProfile, onViewCabinet }: Props) {
       <div style={{ padding: '28px 32px 0', borderBottom: '1px solid var(--border)' }}>
         <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 0 }}>
           <div>
-            <h1 style={{ margin: 0, fontFamily: 'Bebas Neue', fontSize: 40, letterSpacing: 2, lineHeight: 1 }}>Social</h1>
+            <h1 style={{ margin: 0, fontFamily: 'Space Grotesk', fontSize: 40, letterSpacing: 1, lineHeight: 1 }}>Social</h1>
             <p style={{ margin: '4px 0 16px', color: 'var(--muted)', fontSize: 13 }}>See what your friends are playing</p>
           </div>
         </div>
@@ -206,7 +206,7 @@ export function SocialPage({ onViewProfile, onViewCabinet }: Props) {
           <>
             {loadingFeed ? (
               <div style={{ textAlign: 'center', padding: '60px', color: 'var(--muted)' }}>
-                <div style={{ fontFamily: 'Bebas Neue', fontSize: 22, letterSpacing: 3, opacity: 0.4 }}>Loading feed...</div>
+                <div style={{ fontFamily: 'Space Grotesk', fontSize: 22, letterSpacing: 1, opacity: 0.4 }}>Loading feed...</div>
               </div>
             ) : feed.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--muted)' }}>
@@ -223,7 +223,7 @@ export function SocialPage({ onViewProfile, onViewCabinet }: Props) {
                     onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--border)')}
                   >
                     {/* Avatar */}
-                    <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Bebas Neue', fontSize: 17, color: '#000', flexShrink: 0 }}>
+                    <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Space Grotesk', fontSize: 17, color: '#000', flexShrink: 0 }}>
                       {(item.profile.display_name || item.profile.username)[0].toUpperCase()}
                     </div>
 
@@ -292,7 +292,7 @@ function PersonCard({ profile, isFollowing, onToggleFollow, onViewProfile, onVie
       onMouseEnter={e => (e.currentTarget.style.borderColor = 'var(--muted)')}
       onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--border)')}
     >
-      <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Bebas Neue', fontSize: 19, color: '#000', flexShrink: 0 }}>
+      <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Space Grotesk', fontSize: 19, color: '#000', flexShrink: 0 }}>
         {initial}
       </div>
       <div style={{ flex: 1, minWidth: 0, cursor: 'pointer' }} onClick={onViewProfile}>

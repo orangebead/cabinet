@@ -79,7 +79,7 @@ function ListRow({ game, index, onClick }: { game: CabinetGame; index: number; o
             <div style={{ height: 4, width: 60, background: 'var(--surface2)', borderRadius: 2, overflow: 'hidden' }}>
               <div style={{ height: '100%', width: `${(game.rating / 10) * 100}%`, background: 'var(--accent)', borderRadius: 2, transition: 'width 0.3s' }} />
             </div>
-            <span style={{ fontFamily: 'Bebas Neue', fontSize: 15, color: 'var(--accent)', letterSpacing: 1 }}>{game.rating}</span>
+            <span style={{ fontFamily: 'Space Grotesk', fontSize: 15, color: 'var(--accent)', letterSpacing: 1 }}>{game.rating}</span>
           </div>
         ) : (
           <span style={{ color: 'var(--muted)', fontSize: 12 }}>—</span>

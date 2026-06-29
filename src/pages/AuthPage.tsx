@@ -57,8 +57,8 @@ export function AuthPage() {
 
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: 40 }}>
-          <div style={{ fontFamily: 'Bebas Neue', fontSize: 52, letterSpacing: 4, color: 'var(--accent)', lineHeight: 1 }}>CABINET</div>
-          <div style={{ color: 'var(--muted)', fontSize: 13, marginTop: 6, letterSpacing: 1 }}>YOUR PERSONAL GAME SHELF</div>
+          <div style={{ fontFamily: 'Space Grotesk', fontSize: 52, letterSpacing: 0.1, color: 'var(--accent)', lineHeight: 1 }}>Cabinet</div>
+          <div style={{ color: 'var(--muted)', fontSize: 20, marginTop: 6, letterSpacing: 0.1 }}>Your Personal Game Shelf</div>
         </div>
 
         {/* Card */}
@@ -159,12 +159,31 @@ function GoogleIcon() {
 interface PrivacyModalProps { onClose: () => void }
 function PrivacyModal({ onClose }: PrivacyModalProps) {
   return (
-    <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(4px)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div onClick={e => e.stopPropagation()} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 16, width: '100%', maxWidth: 440, padding: 24, display: 'flex', flexDirection: 'column', boxShadow: '0 32px 80px rgba(0,0,0,0.6)', fontFamily: 'DM Sans, sans-serif' }}>
+    <div
+      onClick={onClose}
+      style={{
+        position: 'fixed', inset: 0,
+        background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(4px)',
+        zIndex: 200, display: 'flex',
+        alignItems: 'center', justifyContent: 'center'
+      }}
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        style={{
+          background: 'var(--surface)', border: '1px solid var(--border)',
+          borderRadius: 16, width: '100%', maxWidth: 440,
+          padding: 24, display: 'flex', flexDirection: 'column',
+          boxShadow: '0 32px 80px rgba(0,0,0,0.6)', fontFamily: 'Rethink Sans, sans-serif'
+        }}
+      >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-          <h3 style={{ margin: 0, fontFamily: 'Bebas Neue', fontSize: 24, letterSpacing: 1.5, color: 'var(--text)' }}>Privacy & Security</h3>
+          <h3 style={{ margin: 0, fontFamily: 'Space Grotesk', fontSize: 24, letterSpacing: 0.1, color: 'var(--accent)' }}>
+            Privacy & Security
+          </h3>
           <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer', fontSize: 18 }}>✕</button>
         </div>
+
         <div style={{ color: 'var(--text)', fontSize: 13, lineHeight: 1.6, display: 'flex', flexDirection: 'column', gap: 12 }}>
           <p style={{ margin: 0 }}>
             Cabinet is a personal, non-commercial game shelf project built to track our video game collections and play sessions.
@@ -182,10 +201,20 @@ function PrivacyModal({ onClose }: PrivacyModalProps) {
             We do not sell, share, or track your data with any third-party services. Because this is a shared hobby project, it is provided entirely "as-is" with no uptime guarantees or formal Service Level Agreements (SLA).
           </p>
         </div>
-        <button onClick={onClose} style={{ marginTop: 20, padding: '10px 0', borderRadius: 8, background: 'var(--surface2)', color: 'var(--text)', fontWeight: 600, fontSize: 13, cursor: 'pointer', border: '1px solid var(--border)', transition: 'all 0.15s', fontFamily: 'DM Sans, sans-serif' }}
+
+        <button
+          onClick={onClose}
+          style={{
+            marginTop: 20, padding: '10px 0', borderRadius: 8,
+            background: 'var(--surface2)', color: 'var(--text)', fontWeight: 600,
+            fontSize: 13, cursor: 'pointer', border: '1px solid var(--border)',
+            transition: 'all 0.15s', fontFamily: 'Rethink Sans, sans-serif'
+          }}
           onMouseEnter={e => (e.currentTarget.style.background = 'var(--border)')}
           onMouseLeave={e => (e.currentTarget.style.background = 'var(--surface2)')}
-        >Understood, Close</button>
+        >
+          Understood, Close
+        </button>
       </div>
     </div>
   )

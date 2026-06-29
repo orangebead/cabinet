@@ -42,7 +42,7 @@ export function NotificationBell() {
       {open && (
         <div style={{ position: 'absolute', bottom: 'calc(100% + 8px)', left: '50%', transform: 'translateX(-50%)', width: 300, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 14, boxShadow: '0 20px 60px rgba(0,0,0,0.6)', zIndex: 300, overflow: 'hidden' }}>
           <div style={{ padding: '14px 16px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontFamily: 'Bebas Neue', fontSize: 18, letterSpacing: 1 }}>Notifications</span>
+            <span style={{ fontFamily: 'Space Grotesk', fontSize: 18, letterSpacing: 1 }}>Notifications</span>
             {notifications.length > 0 && (
               <span style={{ color: 'var(--muted)', fontSize: 11 }}>All caught up ✓</span>
             )}
@@ -97,7 +97,7 @@ function NotificationRow({ notification: n }: { notification: Notification; onRe
       onMouseLeave={e => (e.currentTarget.style.background = !n.read ? 'rgba(232,255,71,0.04)' : 'transparent')}
     >
       {/* Avatar */}
-      <div style={{ width: 34, height: 34, borderRadius: '50%', background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Bebas Neue', fontSize: 16, color: '#000', flexShrink: 0 }}>
+      <div style={{ width: 34, height: 34, borderRadius: '50%', background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Space Grotesk', fontSize: 16, color: '#000', flexShrink: 0 }}>
         {initial}
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>

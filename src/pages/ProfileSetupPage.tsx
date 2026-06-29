@@ -26,12 +26,12 @@ export function ProfileSetupPage({ userId }: Props) {
     <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
       <div style={{ width: '100%', maxWidth: 420 }}>
         <div style={{ textAlign: 'center', marginBottom: 40 }}>
-          <div style={{ fontFamily: 'Bebas Neue', fontSize: 52, letterSpacing: 4, color: 'var(--accent)', lineHeight: 1 }}>CABINET</div>
+          <div style={{ fontFamily: 'Space Grotesk', fontSize: 52, letterSpacing: 4, color: 'var(--accent)', lineHeight: 1 }}>CABINET</div>
           <div style={{ color: 'var(--muted)', fontSize: 13, marginTop: 6 }}>ONE LAST STEP</div>
         </div>
 
         <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 16, padding: '32px 28px' }}>
-          <h2 style={{ margin: '0 0 6px', fontFamily: 'Bebas Neue', fontSize: 26, letterSpacing: 1 }}>Set up your profile</h2>
+          <h2 style={{ margin: '0 0 6px', fontFamily: 'Space Grotesk', fontSize: 26, letterSpacing: 1 }}>Set up your profile</h2>
           <p style={{ margin: '0 0 24px', color: 'var(--muted)', fontSize: 13 }}>Pick a username so friends can find you.</p>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>

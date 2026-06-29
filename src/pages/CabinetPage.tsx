@@ -34,7 +34,7 @@ export function CabinetPage() {
       {/* Header */}
       <div style={{ padding: isMobile ? '20px 16px 14px' : '28px 32px 20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 12 }}>
         <div>
-          <h1 style={{ margin: 0, fontFamily: 'Bebas Neue', fontSize: isMobile ? 32 : 40, letterSpacing: 2, lineHeight: 1 }}>{meta.title}</h1>
+          <h1 style={{ margin: 0, fontFamily: 'Space Grotesk', fontSize: isMobile ? 32 : 40, letterSpacing: 1, lineHeight: 1 }}>{meta.title}</h1>
           {!isMobile && <p style={{ margin: '4px 0 0', color: 'var(--muted)', fontSize: 13 }}>{meta.desc}</p>}
         </div>
         <button

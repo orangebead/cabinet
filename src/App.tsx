@@ -104,7 +104,7 @@ function App() {
 function Splash() {
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ fontFamily: 'Bebas Neue', fontSize: 32, letterSpacing: 4, color: 'var(--accent)', opacity: 0.5 }}>CABINET</div>
+      <div style={{ fontFamily: 'Space Grotesk', fontSize: 32, letterSpacing: 4, color: 'var(--accent)', opacity: 0.5 }}>CABINET</div>
     </div>
   )
 }

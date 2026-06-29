@@ -99,7 +99,7 @@ function ProfileHero({
           width: isMobile ? 60 : 72, height: isMobile ? 60 : 72,
           borderRadius: '50%', background: 'var(--accent)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontFamily: 'Bebas Neue', fontSize: isMobile ? 28 : 34,
+          fontFamily: 'Space Grotesk', fontSize: isMobile ? 28 : 34,
           color: '#000', flexShrink: 0,
         }}>
           {initial}
@@ -108,7 +108,7 @@ function ProfileHero({
         {/* Name block */}
         <div style={{ flex: 1, minWidth: 0, paddingTop: 2 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-            <h1 style={{ margin: 0, fontFamily: 'Bebas Neue', fontSize: isMobile ? 28 : 34, letterSpacing: 1, lineHeight: 1 }}>
+            <h1 style={{ margin: 0, fontFamily: 'Space Grotesk', fontSize: isMobile ? 28 : 34, letterSpacing: 1, lineHeight: 1 }}>
               {profile.display_name || profile.username}
             </h1>
             {!profile.is_public && (
@@ -181,7 +181,7 @@ function ProfileHero({
           ...(isOwn ? [{ label: 'Backlogs', value: stats.backlog }] : []),
         ].map((s, i) => (
           <div key={s.label} style={{ padding: isMobile ? '14px 8px' : '16px 12px', textAlign: 'center', borderRight: '1px solid var(--border)', borderBottom: '1px solid var(--border)', background: 'var(--surface)' }}>
-            <div style={{ fontFamily: 'Bebas Neue', fontSize: isMobile ? 24 : 28, letterSpacing: 1, color: i === 1 && stats.completionPct === 100 ? 'var(--accent)' : 'var(--text)', lineHeight: 1 }}>
+            <div style={{ fontFamily: 'Space Grotesk', fontSize: isMobile ? 24 : 28, letterSpacing: 1, color: i === 1 && stats.completionPct === 100 ? 'var(--accent)' : 'var(--text)', lineHeight: 1 }}>
               {s.value}
             </div>
             <div style={{ color: 'var(--muted)', fontSize: 10, marginTop: 4, fontWeight: 600, letterSpacing: 0.5, textTransform: 'uppercase' }}>
@@ -246,7 +246,7 @@ function CabinetGrid({ games, isMobile }: { games: CabinetGame[]; isMobile: bool
             {STATUS_LABELS[game.status]}
           </div>
           {game.rating && (
-            <div style={{ position: 'absolute', top: 5, right: 5, background: 'rgba(0,0,0,0.8)', color: 'var(--accent)', fontSize: 10, fontWeight: 700, padding: '2px 5px', borderRadius: 3, fontFamily: 'Bebas Neue' }}>
+            <div style={{ position: 'absolute', top: 5, right: 5, background: 'rgba(0,0,0,0.8)', color: 'var(--accent)', fontSize: 10, fontWeight: 700, padding: '2px 5px', borderRadius: 3, fontFamily: 'Space Grotesk' }}>
               {game.rating}
             </div>
           )}
@@ -346,9 +346,9 @@ function InsightsTab({ games, isMobile }: { games: CabinetGame[]; isMobile: bool
   }
 
   const sectionLabel: React.CSSProperties = {
-    fontFamily: 'Bebas Neue',
+    fontFamily: 'Space Grotesk',
     fontSize: 13,
-    letterSpacing: 2,
+    letterSpacing: 1,
     color: 'var(--muted)',
     marginBottom: 16,
   }
@@ -356,7 +356,7 @@ function InsightsTab({ games, isMobile }: { games: CabinetGame[]; isMobile: bool
   // recharts tooltip style
   const tooltipStyle = {
     contentStyle: { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text)', fontSize: 12 },
-    itemStyle: { color: '#e8ff47' },
+    itemStyle: { color: '#ffb3f0' },
     cursor: { fill: 'rgba(255,255,255,0.04)' },
   }
 
@@ -372,7 +372,7 @@ function InsightsTab({ games, isMobile }: { games: CabinetGame[]; isMobile: bool
           { label: 'Top Genre', value: loadingGenres ? '…' : (topGenre ?? '—'), accent: false, small: true },
         ].map(c => (
           <div key={c.label} style={{ ...cardStyle, textAlign: 'center', padding: isMobile ? '14px 10px' : '18px 14px' }}>
-            <div style={{ fontFamily: c.small ? 'DM Sans, sans-serif' : 'Bebas Neue', fontSize: c.small ? (isMobile ? 13 : 15) : (isMobile ? 26 : 30), letterSpacing: c.small ? 0 : 1, fontWeight: c.small ? 700 : undefined, color: c.accent ? 'var(--accent)' : 'var(--text)', lineHeight: 1.2, wordBreak: 'break-word' }}>
+            <div style={{ fontFamily: c.small ? 'DM Sans, sans-serif' : 'Space Grotesk', fontSize: c.small ? (isMobile ? 13 : 15) : (isMobile ? 26 : 30), letterSpacing: c.small ? 0 : 1, fontWeight: c.small ? 700 : undefined, color: c.accent ? 'var(--accent)' : 'var(--text)', lineHeight: 1.2, wordBreak: 'break-word' }}>
               {c.value}
             </div>
             <div style={{ color: 'var(--muted)', fontSize: 10, marginTop: 5, fontWeight: 600, letterSpacing: 0.5, textTransform: 'uppercase' }}>{c.label}</div>
@@ -388,15 +388,15 @@ function InsightsTab({ games, isMobile }: { games: CabinetGame[]; isMobile: bool
             <AreaChart data={timelineData} margin={{ top: 4, right: 4, left: -24, bottom: 0 }}>
               <defs>
                 <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#e8ff47" stopOpacity={0.25} />
-                  <stop offset="95%" stopColor="#e8ff47" stopOpacity={0} />
+                  <stop offset="5%" stopColor="#ffb3f0" stopOpacity={0.25} />
+                  <stop offset="95%" stopColor="#ffb3f0" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
               <XAxis dataKey="month" tick={{ fill: 'var(--muted)', fontSize: 10 }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fill: 'var(--muted)', fontSize: 10 }} axisLine={false} tickLine={false} allowDecimals={false} />
               <Tooltip {...tooltipStyle} formatter={(v) => [String(v), 'Added']} />
-              <Area type="monotone" dataKey="total" stroke="#e8ff47" strokeWidth={2} fill="url(#areaGrad)" dot={false} />
+              <Area type="monotone" dataKey="total" stroke="#ffb3f0" strokeWidth={2} fill="url(#areaGrad)" dot={false} />
             </AreaChart>
           </ResponsiveContainer>
         </div>
@@ -416,7 +416,7 @@ function InsightsTab({ games, isMobile }: { games: CabinetGame[]; isMobile: bool
                 {ratingData.map((entry) => (
                   <Cell
                     key={entry.rating}
-                    fill={entry.count === Math.max(...ratingData.map(r => r.count)) && entry.count > 0 ? '#e8ff47' : 'var(--surface2)'}
+                    fill={entry.count === Math.max(...ratingData.map(r => r.count)) && entry.count > 0 ? '#ffb3f0' : 'var(--surface2)'}
                     stroke={entry.count > 0 ? 'var(--border)' : 'transparent'}
                   />
                 ))}
@@ -456,7 +456,7 @@ function InsightsTab({ games, isMobile }: { games: CabinetGame[]; isMobile: bool
               <Tooltip {...tooltipStyle} formatter={(v) => [String(v), 'Games']} />
               <Bar dataKey="count" radius={[0, 4, 4, 0]}>
                 {genreData.map((entry, i) => (
-                  <Cell key={entry.name} fill={i === 0 ? '#e8ff47' : 'var(--surface2)'} stroke={i === 0 ? 'transparent' : 'var(--border)'} />
+                  <Cell key={entry.name} fill={i === 0 ? '#ffb3f0' : 'var(--surface2)'} stroke={i === 0 ? 'transparent' : 'var(--border)'} />
                 ))}
               </Bar>
             </BarChart>
@@ -612,7 +612,7 @@ export function ProfilePage({ username, onViewCabinet }: Props) {
               const init = (p.display_name || p.username)[0].toUpperCase()
               return (
                 <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10 }}>
-                  <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Bebas Neue', fontSize: 16, color: '#000', flexShrink: 0 }}>
+                  <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Space Grotesk', fontSize: 16, color: '#000', flexShrink: 0 }}>
                     {init}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
