@@ -63,6 +63,21 @@ function StatusBar({ games }: { games: CabinetGame[] }) {
   )
 }
 
+// ── Sign out button ───────────────────────────────────────────────────────────
+function SignOutButton() {
+  const { signOut } = useAuthStore()
+  return (
+    <button
+      onClick={signOut}
+      style={{ padding: '5px 12px', borderRadius: 7, border: '1px solid var(--border)', background: 'transparent', color: 'var(--muted)', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'Rethink Sans, sans-serif', transition: 'all 0.15s' }}
+      onMouseEnter={e => { e.currentTarget.style.borderColor = '#f87171'; e.currentTarget.style.color = '#f87171' }}
+      onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--muted)' }}
+    >
+      Sign out
+    </button>
+  )
+}
+
 // ── Profile hero — shared between own + friend views ─────────────────────────
 function ProfileHero({
   profile, stats, isMobile, isOwn, following,
@@ -124,7 +139,7 @@ function ProfileHero({
         {!isOwn && onFollow && (
           <button
             onClick={onFollow}
-            style={{ padding: '8px 18px', borderRadius: 8, border: following ? '1px solid var(--border)' : 'none', background: following ? 'transparent' : 'var(--accent)', color: following ? 'var(--muted)' : '#000', fontWeight: 700, fontSize: 13, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', transition: 'all 0.15s', flexShrink: 0 }}
+            style={{ padding: '8px 18px', borderRadius: 8, border: following ? '1px solid var(--border)' : 'none', background: following ? 'transparent' : 'var(--accent)', color: following ? 'var(--muted)' : '#000', fontWeight: 700, fontSize: 13, cursor: 'pointer', fontFamily: 'Rethink Sans, sans-serif', transition: 'all 0.15s', flexShrink: 0 }}
             onMouseEnter={e => { if (following) { e.currentTarget.style.color = '#f87171'; e.currentTarget.style.borderColor = '#f87171' } }}
             onMouseLeave={e => { if (following) { e.currentTarget.style.color = 'var(--muted)'; e.currentTarget.style.borderColor = 'var(--border)' } }}
           >
@@ -142,11 +157,11 @@ function ProfileHero({
               onChange={e => setBioText?.(e.target.value)}
               placeholder="Write a short bio…"
               rows={3}
-              style={{ width: '100%', background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text)', fontSize: 13, padding: '10px 12px', outline: 'none', resize: 'none', fontFamily: 'DM Sans, sans-serif', boxSizing: 'border-box' }}
+              style={{ width: '100%', background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text)', fontSize: 13, padding: '10px 12px', outline: 'none', resize: 'none', fontFamily: 'Rethink Sans, sans-serif', boxSizing: 'border-box' }}
             />
             <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-              <button onClick={onSaveBio} style={{ padding: '7px 16px', borderRadius: 7, border: 'none', background: 'var(--accent)', color: '#000', fontWeight: 700, fontSize: 12, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>Save</button>
-              <button onClick={onCancelBio} style={{ padding: '7px 16px', borderRadius: 7, border: '1px solid var(--border)', background: 'transparent', color: 'var(--muted)', fontSize: 12, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>Cancel</button>
+              <button onClick={onSaveBio} style={{ padding: '7px 16px', borderRadius: 7, border: 'none', background: 'var(--accent)', color: '#000', fontWeight: 700, fontSize: 12, cursor: 'pointer', fontFamily: 'Rethink Sans, sans-serif' }}>Save</button>
+              <button onClick={onCancelBio} style={{ padding: '7px 16px', borderRadius: 7, border: '1px solid var(--border)', background: 'transparent', color: 'var(--muted)', fontSize: 12, cursor: 'pointer', fontFamily: 'Rethink Sans, sans-serif' }}>Cancel</button>
             </div>
           </div>
         ) : (
@@ -155,7 +170,8 @@ function ProfileHero({
               {profile.bio || (isOwn ? 'No bio yet.' : 'No bio.')}
             </p>
             {isOwn && (
-              <button onClick={onStartEditBio} style={{ padding: '4px 10px', borderRadius: 6, border: '1px solid var(--border)', background: 'transparent', color: 'var(--muted)', fontSize: 11, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', flexShrink: 0, transition: 'all 0.15s' }}
+              <button onClick={onStartEditBio}
+                style={{ padding: '4px 10px', borderRadius: 6, border: '1px solid var(--border)', background: 'transparent', color: 'var(--muted)', fontSize: 11, cursor: 'pointer', fontFamily: 'Rethink Sans, sans-serif', flexShrink: 0, transition: 'all 0.15s' }}
                 onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface2)'; e.currentTarget.style.color = 'var(--text)' }}
                 onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--muted)' }}
               >Edit</button>
@@ -202,7 +218,7 @@ function ProfileHero({
       {!isOwn && profile.is_public && onViewCabinet && (
         <button
           onClick={onViewCabinet}
-          style={{ width: '100%', padding: '11px', borderRadius: 9, border: '1px solid var(--border)', background: 'transparent', color: 'var(--text)', fontWeight: 600, fontSize: 13, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', transition: 'background 0.15s', marginBottom: 20 }}
+          style={{ width: '100%', padding: '11px', borderRadius: 9, border: '1px solid var(--border)', background: 'transparent', color: 'var(--text)', fontWeight: 600, fontSize: 13, cursor: 'pointer', fontFamily: 'Rethink Sans, sans-serif', transition: 'background 0.15s', marginBottom: 20 }}
           onMouseEnter={e => (e.currentTarget.style.background = 'var(--surface2)')}
           onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
         >
@@ -210,16 +226,19 @@ function ProfileHero({
         </button>
       )}
 
-      {/* ── Own profile: public toggle ── */}
+      {/* ── Own profile: public toggle + sign out ── */}
       {isOwn && (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: 16 }}>
-          <span style={{ color: 'var(--muted)', fontSize: 12 }}>Public profile</span>
-          <div
-            onClick={onTogglePublic}
-            style={{ width: 36, height: 20, borderRadius: 10, background: profile.is_public ? 'var(--accent)' : 'var(--surface2)', border: '1px solid var(--border)', position: 'relative', cursor: 'pointer', transition: 'background 0.2s' }}
-          >
-            <div style={{ position: 'absolute', top: 2, left: profile.is_public ? 17 : 2, width: 14, height: 14, borderRadius: '50%', background: profile.is_public ? '#000' : 'var(--muted)', transition: 'left 0.2s' }} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ color: 'var(--muted)', fontSize: 12 }}>Public profile</span>
+            <div
+              onClick={onTogglePublic}
+              style={{ width: 36, height: 20, borderRadius: 10, background: profile.is_public ? 'var(--accent)' : 'var(--surface2)', border: '1px solid var(--border)', position: 'relative', cursor: 'pointer', transition: 'background 0.2s' }}
+            >
+              <div style={{ position: 'absolute', top: 2, left: profile.is_public ? 17 : 2, width: 14, height: 14, borderRadius: '50%', background: profile.is_public ? '#000' : 'var(--muted)', transition: 'left 0.2s' }} />
+            </div>
           </div>
+          <SignOutButton />
         </div>
       )}
     </div>
@@ -235,7 +254,7 @@ function CabinetGrid({ games, isMobile }: { games: CabinetGame[]; isMobile: bool
     </div>
   )
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(isMobile ? 90px : 110px, 1fr))'.replace('isMobile ? 90px : 110px', isMobile ? '90px' : '110px'), gap: 8 }}>
+    <div style={{ display: 'grid', gridTemplateColumns: `repeat(auto-fill, minmax(${isMobile ? '90px' : '110px'}, 1fr))`, gap: 8 }}>
       {games.map(game => (
         <div key={game.id} style={{ position: 'relative', borderRadius: 8, overflow: 'hidden', border: '1px solid var(--border)', aspectRatio: '3/4' }}>
           {game.cover
@@ -262,7 +281,6 @@ function InsightsTab({ games, isMobile }: { games: CabinetGame[]; isMobile: bool
   const [genreData, setGenreData] = useState<{ name: string; count: number }[]>([])
   const [loadingGenres, setLoadingGenres] = useState(true)
 
-  // ── Rating distribution ──────────────────────────────────────────────────────
   const ratingData = useMemo(() => {
     return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => ({
       rating: String(n),
@@ -270,7 +288,6 @@ function InsightsTab({ games, isMobile }: { games: CabinetGame[]; isMobile: bool
     }))
   }, [cabinet])
 
-  // ── Status breakdown ─────────────────────────────────────────────────────────
   const statusData = useMemo(() => {
     const order: GameStatus[] = ['in_progress', 'completed', 'hundred_percent', 'unplayed']
     return order.map(s => ({
@@ -280,7 +297,6 @@ function InsightsTab({ games, isMobile }: { games: CabinetGame[]; isMobile: bool
     })).filter(d => d.count > 0)
   }, [cabinet])
 
-  // ── Games added over time (by month) ────────────────────────────────────────
   const timelineData = useMemo(() => {
     if (!cabinet.length) return []
     const byMonth: Record<string, number> = {}
@@ -291,7 +307,6 @@ function InsightsTab({ games, isMobile }: { games: CabinetGame[]; isMobile: bool
       byMonth[key] = (byMonth[key] ?? 0) + 1
     })
     const sorted = Object.entries(byMonth).sort(([a], [b]) => a.localeCompare(b))
-    // cumulative
     let cum = 0
     return sorted.map(([month, count]) => {
       cum += count
@@ -301,7 +316,6 @@ function InsightsTab({ games, isMobile }: { games: CabinetGame[]; isMobile: bool
     })
   }, [cabinet])
 
-  // ── Top genres via RAWG tags (cached) ───────────────────────────────────────
   useEffect(() => {
     if (!cabinet.length) { setLoadingGenres(false); return }
     const tagged = cabinet.filter(g => g.rawg_id)
@@ -321,7 +335,6 @@ function InsightsTab({ games, isMobile }: { games: CabinetGame[]; isMobile: bool
     })
   }, [cabinet.length])
 
-  // ── Derived callouts ─────────────────────────────────────────────────────────
   const rated = cabinet.filter(g => g.rating)
   const avgRating = rated.length
     ? (rated.reduce((s, g) => s + g.rating!, 0) / rated.length).toFixed(1)
@@ -351,9 +364,9 @@ function InsightsTab({ games, isMobile }: { games: CabinetGame[]; isMobile: bool
     letterSpacing: 0.1,
     color: 'var(--muted)',
     marginBottom: 16,
+    fontWeight: 600,
   }
 
-  // recharts tooltip style
   const tooltipStyle = {
     contentStyle: { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text)', fontSize: 12 },
     itemStyle: { color: '#ffb3f0' },
@@ -372,7 +385,7 @@ function InsightsTab({ games, isMobile }: { games: CabinetGame[]; isMobile: bool
           { label: 'Top Genre', value: loadingGenres ? '…' : (topGenre ?? '—'), accent: false, small: true },
         ].map(c => (
           <div key={c.label} style={{ ...cardStyle, textAlign: 'center', padding: isMobile ? '14px 10px' : '18px 14px' }}>
-            <div style={{ fontFamily: c.small ? 'DM Sans, sans-serif' : 'Space Grotesk', fontSize: c.small ? (isMobile ? 13 : 15) : (isMobile ? 26 : 30), letterSpacing: c.small ? 0 : 1, fontWeight: c.small ? 700 : undefined, color: c.accent ? 'var(--accent)' : 'var(--text)', lineHeight: 1.2, wordBreak: 'break-word' }}>
+            <div style={{ fontFamily: c.small ? 'Rethink Sans, sans-serif' : 'Space Grotesk', fontSize: c.small ? (isMobile ? 13 : 15) : (isMobile ? 26 : 30), letterSpacing: 0, fontWeight: c.small ? 700 : 600, color: c.accent ? 'var(--accent)' : 'var(--text)', lineHeight: 1.2, wordBreak: 'break-word' }}>
               {c.value}
             </div>
             <div style={{ color: 'var(--muted)', fontSize: 10, marginTop: 5, fontWeight: 600, letterSpacing: 0.5, textTransform: 'uppercase' }}>{c.label}</div>
@@ -380,7 +393,7 @@ function InsightsTab({ games, isMobile }: { games: CabinetGame[]; isMobile: bool
         ))}
       </div>
 
-      {/* ── Games added over time ── */}
+      {/* ── Collection growth ── */}
       {timelineData.length > 1 && (
         <div style={cardStyle}>
           <div style={sectionLabel}>COLLECTION GROWTH</div>
@@ -395,7 +408,7 @@ function InsightsTab({ games, isMobile }: { games: CabinetGame[]; isMobile: bool
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
               <XAxis dataKey="month" tick={{ fill: 'var(--muted)', fontSize: 10 }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fill: 'var(--muted)', fontSize: 10 }} axisLine={false} tickLine={false} allowDecimals={false} />
-              <Tooltip {...tooltipStyle} formatter={(v) => [String(v), 'Added']} />
+              <Tooltip {...tooltipStyle} formatter={(v) => [String(v), 'Total']} />
               <Area type="monotone" dataKey="total" stroke="#ffb3f0" strokeWidth={2} fill="url(#areaGrad)" dot={false} />
             </AreaChart>
           </ResponsiveContainer>
@@ -468,9 +481,9 @@ function InsightsTab({ games, isMobile }: { games: CabinetGame[]; isMobile: bool
         <div style={{ ...cardStyle, display: 'flex', alignItems: 'center', gap: 10, color: 'var(--muted)', fontSize: 13 }}>
           <div style={{ width: 16, height: 16, borderRadius: '50%', border: '2px solid var(--border)', borderTop: '2px solid var(--accent)', animation: 'spin 0.8s linear infinite', flexShrink: 0 }} />
           Loading genre data…
+          <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
         </div>
       )}
-
     </div>
   )
 }
@@ -589,7 +602,7 @@ export function ProfilePage({ username, onViewCabinet }: Props) {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            style={{ padding: '14px 20px', border: 'none', background: 'transparent', color: activeTab === tab.id ? 'var(--text)' : 'var(--muted)', fontWeight: activeTab === tab.id ? 700 : 400, fontSize: 13, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', borderBottom: activeTab === tab.id ? '2px solid var(--accent)' : '2px solid transparent', transition: 'all 0.15s', whiteSpace: 'nowrap', flexShrink: 0 }}
+            style={{ padding: '14px 20px', border: 'none', background: 'transparent', color: activeTab === tab.id ? 'var(--text)' : 'var(--muted)', fontWeight: activeTab === tab.id ? 700 : 400, fontSize: 13, cursor: 'pointer', fontFamily: 'Rethink Sans, sans-serif', borderBottom: activeTab === tab.id ? '2px solid var(--accent)' : '2px solid transparent', transition: 'all 0.15s', whiteSpace: 'nowrap', flexShrink: 0 }}
           >
             {tab.label}
           </button>
@@ -632,15 +645,11 @@ export function ProfilePage({ username, onViewCabinet }: Props) {
   )
 }
 
-// ── FriendCabinetPage — same hero, different content ─────────────────────────
-// Re-exported here so both pages share the ProfileHero component.
-// If you keep FriendCabinetPage.tsx as a separate file, import ProfileHero from a shared file.
-
 function SmBtn({ label, onClick, accent }: { label: string; onClick: () => void; accent?: boolean }) {
   return (
     <button
       onClick={onClick}
-      style={{ padding: '6px 12px', borderRadius: 7, border: accent ? 'none' : '1px solid var(--border)', background: accent ? 'var(--accent)' : 'transparent', color: accent ? '#000' : 'var(--muted)', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', transition: 'all 0.15s', flexShrink: 0 }}
+      style={{ padding: '6px 12px', borderRadius: 7, border: accent ? 'none' : '1px solid var(--border)', background: accent ? 'var(--accent)' : 'transparent', color: accent ? '#000' : 'var(--muted)', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'Rethink Sans, sans-serif', transition: 'all 0.15s', flexShrink: 0 }}
       onMouseEnter={e => { if (!accent) { e.currentTarget.style.background = 'var(--surface2)'; e.currentTarget.style.color = 'var(--text)' } }}
       onMouseLeave={e => { if (!accent) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--muted)' } }}
     >
