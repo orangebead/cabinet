@@ -152,7 +152,7 @@ export function SocialPage({ onViewProfile, onViewCabinet }: Props) {
       <div style={{ padding: '28px 32px 0', borderBottom: '1px solid var(--border)' }}>
         <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 0 }}>
           <div>
-            <h1 style={{ margin: 0, fontFamily: 'Space Grotesk', fontSize: 40, letterSpacing: 1, lineHeight: 1 }}>Social</h1>
+            <h1 style={{ margin: 0, fontFamily: 'Space Grotesk', fontSize: 40, letterSpacing: 0.1, lineHeight: 1 }}>Social</h1>
             <p style={{ margin: '4px 0 16px', color: 'var(--muted)', fontSize: 13 }}>See what your friends are playing</p>
           </div>
         </div>
@@ -185,7 +185,7 @@ export function SocialPage({ onViewProfile, onViewCabinet }: Props) {
         {/* Search results */}
         {searchResults.length > 0 && (
           <div style={{ marginBottom: 32 }}>
-            <div style={{ color: 'var(--muted)', fontSize: 10, fontWeight: 700, letterSpacing: 1.5, marginBottom: 10 }}>SEARCH RESULTS</div>
+            <div style={{ color: 'var(--muted)', fontSize: 10, fontWeight: 700, letterSpacing: 0.1, marginBottom: 10 }}>SEARCH RESULTS</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxWidth: 540 }}>
               {searchResults.map(p => (
                 <PersonCard
@@ -206,7 +206,7 @@ export function SocialPage({ onViewProfile, onViewCabinet }: Props) {
           <>
             {loadingFeed ? (
               <div style={{ textAlign: 'center', padding: '60px', color: 'var(--muted)' }}>
-                <div style={{ fontFamily: 'Space Grotesk', fontSize: 22, letterSpacing: 1, opacity: 0.4 }}>Loading feed...</div>
+                <div style={{ fontFamily: 'Space Grotesk', fontSize: 22, letterSpacing: 0.1, opacity: 0.4 }}>Loading feed...</div>
               </div>
             ) : feed.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--muted)' }}>

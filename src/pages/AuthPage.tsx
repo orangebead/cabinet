@@ -92,7 +92,7 @@ export function AuthPage() {
           {/* Divider */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
             <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
-            <span style={{ color: 'var(--muted)', fontSize: 11, fontWeight: 600, letterSpacing: 1 }}>OR</span>
+            <span style={{ color: 'var(--muted)', fontSize: 11, fontWeight: 600, letterSpacing: 0.1 }}>OR</span>
             <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
           </div>
 
@@ -230,7 +230,7 @@ function Field({ label, type, value, onChange, onKeyDown, placeholder }: {
 }) {
   return (
     <div>
-      <label style={{ display: 'block', color: 'var(--muted)', fontSize: 11, fontWeight: 700, letterSpacing: 1.5, marginBottom: 7, textTransform: 'uppercase' }}>{label}</label>
+      <label style={{ display: 'block', color: 'var(--muted)', fontSize: 11, fontWeight: 700, letterSpacing: 0.1, marginBottom: 7, textTransform: 'uppercase' }}>{label}</label>
       <input
         type={type}
         value={value}

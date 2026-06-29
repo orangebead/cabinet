@@ -14,7 +14,7 @@ export function ListView({ games }: Props) {
         {/* Column headers */}
         <div style={{ display: 'grid', gridTemplateColumns: '2fr 140px 100px 80px', gap: 12, padding: '6px 16px', marginBottom: 4 }}>
           {['Game', 'Status', 'Rating', 'Added'].map(h => (
-            <span key={h} style={{ color: 'var(--muted)', fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: 'uppercase' }}>{h}</span>
+            <span key={h} style={{ color: 'var(--muted)', fontSize: 10, fontWeight: 700, letterSpacing: 0.1, textTransform: 'uppercase' }}>{h}</span>
           ))}
         </div>
 
@@ -79,7 +79,7 @@ function ListRow({ game, index, onClick }: { game: CabinetGame; index: number; o
             <div style={{ height: 4, width: 60, background: 'var(--surface2)', borderRadius: 2, overflow: 'hidden' }}>
               <div style={{ height: '100%', width: `${(game.rating / 10) * 100}%`, background: 'var(--accent)', borderRadius: 2, transition: 'width 0.3s' }} />
             </div>
-            <span style={{ fontFamily: 'Space Grotesk', fontSize: 15, color: 'var(--accent)', letterSpacing: 1 }}>{game.rating}</span>
+            <span style={{ fontFamily: 'Space Grotesk', fontSize: 15, color: 'var(--accent)', letterSpacing: 0.1 }}>{game.rating}</span>
           </div>
         ) : (
           <span style={{ color: 'var(--muted)', fontSize: 12 }}>—</span>

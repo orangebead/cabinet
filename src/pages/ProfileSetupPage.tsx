@@ -26,17 +26,17 @@ export function ProfileSetupPage({ userId }: Props) {
     <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
       <div style={{ width: '100%', maxWidth: 420 }}>
         <div style={{ textAlign: 'center', marginBottom: 40 }}>
-          <div style={{ fontFamily: 'Space Grotesk', fontSize: 52, letterSpacing: 4, color: 'var(--accent)', lineHeight: 1 }}>CABINET</div>
+          <div style={{ fontFamily: 'Space Grotesk', fontSize: 52, letterSpacing: 0.1, color: 'var(--accent)', lineHeight: 1 }}>CABINET</div>
           <div style={{ color: 'var(--muted)', fontSize: 13, marginTop: 6 }}>ONE LAST STEP</div>
         </div>
 
         <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 16, padding: '32px 28px' }}>
-          <h2 style={{ margin: '0 0 6px', fontFamily: 'Space Grotesk', fontSize: 26, letterSpacing: 1 }}>Set up your profile</h2>
+          <h2 style={{ margin: '0 0 6px', fontFamily: 'Space Grotesk', fontSize: 26, letterSpacing: 0.1 }}>Set up your profile</h2>
           <p style={{ margin: '0 0 24px', color: 'var(--muted)', fontSize: 13 }}>Pick a username so friends can find you.</p>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <div>
-              <label style={{ display: 'block', color: 'var(--muted)', fontSize: 11, fontWeight: 700, letterSpacing: 1.5, marginBottom: 7, textTransform: 'uppercase' }}>Username *</label>
+              <label style={{ display: 'block', color: 'var(--muted)', fontSize: 11, fontWeight: 700, letterSpacing: 0.1, marginBottom: 7, textTransform: 'uppercase' }}>Username *</label>
               <div style={{ position: 'relative' }}>
                 <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)', fontSize: 14 }}>@</span>
                 <input
@@ -52,7 +52,7 @@ export function ProfileSetupPage({ userId }: Props) {
             </div>
 
             <div>
-              <label style={{ display: 'block', color: 'var(--muted)', fontSize: 11, fontWeight: 700, letterSpacing: 1.5, marginBottom: 7, textTransform: 'uppercase' }}>Display Name <span style={{ fontWeight: 400, textTransform: 'none' }}>(optional)</span></label>
+              <label style={{ display: 'block', color: 'var(--muted)', fontSize: 11, fontWeight: 700, letterSpacing: 0.1, marginBottom: 7, textTransform: 'uppercase' }}>Display Name <span style={{ fontWeight: 400, textTransform: 'none' }}>(optional)</span></label>
               <input
                 value={displayName}
                 onChange={e => setDisplayName(e.target.value)}

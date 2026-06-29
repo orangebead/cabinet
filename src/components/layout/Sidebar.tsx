@@ -49,11 +49,11 @@ export function Sidebar({ currentPage, onNavigate }: Props) {
       <aside style={{ position: 'fixed', top: 0, left: 0, width: 220, height: '100vh', background: 'var(--surface)', borderRight: '1px solid var(--border)', display: 'flex', flexDirection: 'column', zIndex: 50, overflow: 'hidden' }}>
 
         <div style={{ padding: '28px 24px 20px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
-          <div style={{ fontFamily: 'Space Grotesk', fontSize: 32, letterSpacing: 1, color: 'var(--accent)', lineHeight: 1 }}>Cabinet</div>
+          <div style={{ fontFamily: 'Space Grotesk', fontSize: 32, letterSpacing: 0.1, color: 'var(--accent)', lineHeight: 1 }}>Cabinet</div>
         </div>
 
         <nav style={{ padding: '16px 12px', flex: 1, display: 'flex', flexDirection: 'column' }}>
-          <div style={{ color: 'var(--muted)', fontSize: 10, fontWeight: 700, letterSpacing: 1.5, padding: '0 12px', marginBottom: 6 }}>MY LISTS</div>
+          <div style={{ color: 'var(--muted)', fontSize: 20 , fontWeight: 700, letterSpacing: 0.1, padding: '0 12px', marginBottom: 6 }}>My Lists</div>
           {lists.map(list => (
             <button key={list.id} onClick={() => { setActiveList(list.id); onNavigate({ id: 'cabinet' }) }} style={{ ...navBtn(currentPage === 'cabinet' && activeList === list.id), justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -64,7 +64,7 @@ export function Sidebar({ currentPage, onNavigate }: Props) {
             </button>
           ))}
 
-          <div style={{ color: 'var(--muted)', fontSize: 10, fontWeight: 700, letterSpacing: 1.5, padding: '12px 12px 6px', marginTop: 8 }}>SOCIAL</div>
+          <div style={{ color: 'var(--muted)', fontSize: 20, fontWeight: 700, letterSpacing: 0.1, padding: '12px 12px 6px', marginTop: 8 }}>Social</div>
           <button onClick={() => onNavigate({ id: 'profile' })} style={navBtn(currentPage === 'profile' || currentPage === 'view-profile')}>
             <span style={{ fontSize: 16 }}></span><span>Profile</span>
           </button>

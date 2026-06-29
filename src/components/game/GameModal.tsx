@@ -331,7 +331,7 @@ export function GameModal({ game, onClose, readOnly = false }: { game: CabinetGa
                     </button>
                   ))}
                   {pendingRating && (
-                    <span style={{ marginLeft: 6, fontFamily: 'Space Grotesk', fontSize: 26, color: 'var(--accent)', letterSpacing: 1 }}>{pendingRating}/10</span>
+                    <span style={{ marginLeft: 6, fontFamily: 'Space Grotesk', fontSize: 26, color: 'var(--accent)', letterSpacing: 0.1 }}>{pendingRating}/10</span>
                   )}
                 </div>
               </Section>
@@ -346,7 +346,7 @@ export function GameModal({ game, onClose, readOnly = false }: { game: CabinetGa
                       {n}
                     </div>
                   ))}
-                  <span style={{ marginLeft: 6, fontFamily: 'Space Grotesk', fontSize: 26, color: 'var(--accent)', letterSpacing: 1 }}>{game.rating}/10</span>
+                  <span style={{ marginLeft: 6, fontFamily: 'Space Grotesk', fontSize: 26, color: 'var(--accent)', letterSpacing: 0.1 }}>{game.rating}/10</span>
                 </div>
               </Section>
             )}
@@ -441,7 +441,7 @@ export function GameModal({ game, onClose, readOnly = false }: { game: CabinetGa
 function Section({ label, children }: { label: React.ReactNode; children: React.ReactNode }) {
   return (
     <div>
-      <div style={{ color: 'var(--muted)', fontSize: 10, letterSpacing: 1, fontWeight: 700, marginBottom: 10 }}>{label}</div>
+      <div style={{ color: 'var(--muted)', fontSize: 10, letterSpacing: 0.1, fontWeight: 700, marginBottom: 10 }}>{label}</div>
       {children}
     </div>
   )

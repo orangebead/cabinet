@@ -108,7 +108,7 @@ function ProfileHero({
         {/* Name block */}
         <div style={{ flex: 1, minWidth: 0, paddingTop: 2 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-            <h1 style={{ margin: 0, fontFamily: 'Space Grotesk', fontSize: isMobile ? 28 : 34, letterSpacing: 1, lineHeight: 1 }}>
+            <h1 style={{ margin: 0, fontFamily: 'Space Grotesk', fontSize: isMobile ? 28 : 34, letterSpacing: 0.1, lineHeight: 1 }}>
               {profile.display_name || profile.username}
             </h1>
             {!profile.is_public && (
@@ -181,7 +181,7 @@ function ProfileHero({
           ...(isOwn ? [{ label: 'Backlogs', value: stats.backlog }] : []),
         ].map((s, i) => (
           <div key={s.label} style={{ padding: isMobile ? '14px 8px' : '16px 12px', textAlign: 'center', borderRight: '1px solid var(--border)', borderBottom: '1px solid var(--border)', background: 'var(--surface)' }}>
-            <div style={{ fontFamily: 'Space Grotesk', fontSize: isMobile ? 24 : 28, letterSpacing: 1, color: i === 1 && stats.completionPct === 100 ? 'var(--accent)' : 'var(--text)', lineHeight: 1 }}>
+            <div style={{ fontFamily: 'Space Grotesk', fontSize: isMobile ? 24 : 28, letterSpacing: 0.1, color: i === 1 && stats.completionPct === 100 ? 'var(--accent)' : 'var(--text)', lineHeight: 1 }}>
               {s.value}
             </div>
             <div style={{ color: 'var(--muted)', fontSize: 10, marginTop: 4, fontWeight: 600, letterSpacing: 0.5, textTransform: 'uppercase' }}>
@@ -348,7 +348,7 @@ function InsightsTab({ games, isMobile }: { games: CabinetGame[]; isMobile: bool
   const sectionLabel: React.CSSProperties = {
     fontFamily: 'Space Grotesk',
     fontSize: 13,
-    letterSpacing: 1,
+    letterSpacing: 0.1,
     color: 'var(--muted)',
     marginBottom: 16,
   }
