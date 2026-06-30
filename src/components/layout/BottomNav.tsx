@@ -1,5 +1,6 @@
 import { useCabinetStore } from '../../store/cabinetStore'
 import { useNotificationStore } from '../../store/notificationStore'
+import { FaBoxOpen, FaListUl, FaBookmark, FaUsers, FaUser } from 'react-icons/fa'
 import type { GameList } from '../../types'
 import type { Page } from '../../App'
 
@@ -13,16 +14,16 @@ export function BottomNav({ currentPage, onNavigate }: Props) {
   const { unreadCount } = useNotificationStore()
 
   const navItems = [
-    { id: 'cabinet', label: 'Cabinet', icon: '🗃️', action: () => { setActiveList('cabinet' as GameList); onNavigate({ id: 'cabinet' }) } },
-    { id: 'backlog', label: 'Backlog', icon: '📋', action: () => { setActiveList('backlog' as GameList); onNavigate({ id: 'cabinet' }) } },
-    { id: 'wishlist', label: 'Wishlist', icon: '✨', action: () => { setActiveList('wishlist' as GameList); onNavigate({ id: 'cabinet' }) } },
-    { id: 'social', label: 'Social', icon: '📡', action: () => onNavigate({ id: 'social' }) },
-    { id: 'profile', label: 'Profile', icon: '👤', action: () => onNavigate({ id: 'profile' }) },
+    { id: 'cabinet',  label: 'Cabinet',  Icon: FaBoxOpen,  action: () => { setActiveList('cabinet' as GameList);  onNavigate({ id: 'cabinet' }) } },
+    { id: 'backlog',  label: 'Backlog',  Icon: FaListUl,   action: () => { setActiveList('backlog' as GameList);  onNavigate({ id: 'cabinet' }) } },
+    { id: 'wishlist', label: 'Wishlist', Icon: FaBookmark, action: () => { setActiveList('wishlist' as GameList); onNavigate({ id: 'cabinet' }) } },
+    { id: 'social',   label: 'Social',   Icon: FaUsers,    action: () => onNavigate({ id: 'social' }) },
+    { id: 'profile',  label: 'Profile',  Icon: FaUser,     action: () => onNavigate({ id: 'profile' }) },
   ]
 
   const isActive = (id: string) => {
-    if (id === 'cabinet') return currentPage === 'cabinet' && activeList === 'cabinet'
-    if (id === 'backlog') return currentPage === 'cabinet' && activeList === 'backlog'
+    if (id === 'cabinet')  return currentPage === 'cabinet' && activeList === 'cabinet'
+    if (id === 'backlog')  return currentPage === 'cabinet' && activeList === 'backlog'
     if (id === 'wishlist') return currentPage === 'cabinet' && activeList === 'wishlist'
     return currentPage === id
   }
@@ -46,11 +47,11 @@ export function BottomNav({ currentPage, onNavigate }: Props) {
             color: isActive(item.id) ? 'var(--accent)' : 'var(--muted)',
             cursor: 'pointer', position: 'relative',
             transition: 'color 0.15s',
-            fontFamily: 'DM Sans, sans-serif',
+            fontFamily: 'Rethink Sans, sans-serif',
           }}
         >
-          <span style={{ fontSize: 20, position: 'relative' }}>
-            {item.icon}
+          <span style={{ fontSize: 18, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <item.Icon />
             {item.id === 'social' && unreadCount > 0 && (
               <span style={{ position: 'absolute', top: -4, right: -6, width: 14, height: 14, borderRadius: '50%', background: 'var(--accent)', color: '#000', fontSize: 8, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid var(--surface)' }}>
                 {unreadCount > 9 ? '9+' : unreadCount}
