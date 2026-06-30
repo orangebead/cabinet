@@ -21,6 +21,7 @@ export interface RawgGame {
   background_image: string | null
   released: string | null
   metacritic: number | null
+  tags?: { id: number; name: string; slug: string }[]
 }
 
 export interface GameDetails {
@@ -68,6 +69,6 @@ export interface FeedItem {
   type: 'game_added' | 'status_changed' | 'review_written' | 'rating_given'
   game_title: string
   game_cover: string | null
-  meta: string // e.g. "marked as Completed" or "gave it 8/10"
+  meta: string
   created_at: string
 }
