@@ -67,6 +67,13 @@ export function GameModal({ game, onClose, readOnly = false }: { game: CabinetGa
   const { updateStatus, updateRating, updateReview, removeGame, moveToList } = useCabinetStore()
 
   useEffect(() => { requestAnimationFrame(() => setMounted(true)) }, [])
+
+  useEffect(() => {
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = prev }
+  }, [])
+
   useEffect(() => {
     if (!game.rawg_id) return
     fetchGameDetails(game.rawg_id).then(setDetails)
@@ -104,7 +111,7 @@ export function GameModal({ game, onClose, readOnly = false }: { game: CabinetGa
     padding: '3px 9px', borderRadius: 6, fontSize: 12, fontWeight: 500,
     border: '1px solid var(--border)', color: 'var(--muted)',
     background: 'var(--surface2)', whiteSpace: 'nowrap' as const,
-    fontFamily: 'DM Sans, sans-serif',
+    fontFamily: 'Rethink Sans, sans-serif',
   }
 
   // ── Animation styles ─────────────────────────────────────────────────────────
@@ -112,6 +119,7 @@ export function GameModal({ game, onClose, readOnly = false }: { game: CabinetGa
     position: 'fixed', inset: 0, zIndex: 200,
     display: 'flex', alignItems: 'center', justifyContent: 'center',
     padding: isMobile ? 0 : 24,
+    touchAction: 'none',
     background: mounted ? 'rgba(0,0,0,0.75)' : 'rgba(0,0,0,0)',
     backdropFilter: mounted ? 'blur(6px)' : 'blur(0px)',
     transition: 'background 0.25s ease, backdrop-filter 0.25s ease',
@@ -125,6 +133,8 @@ export function GameModal({ game, onClose, readOnly = false }: { game: CabinetGa
     maxWidth: isMobile ? '100%' : 700,
     maxHeight: isMobile ? '92vh' : '90vh',
     overflowY: 'auto',
+    WebkitOverflowScrolling: 'touch',
+    overscrollBehavior: 'contain', // <--- ADD THIS
     boxShadow: '0 40px 100px rgba(0,0,0,0.7)',
     transform: mounted
       ? 'translateY(0) scale(1)'
@@ -144,7 +154,7 @@ export function GameModal({ game, onClose, readOnly = false }: { game: CabinetGa
         .review-markdown p { margin: 0 0 10px; }
         .review-markdown strong { color: var(--accent); }
         .review-markdown em { color: var(--muted); font-style: italic; }
-        .review-markdown h1, .review-markdown h2, .review-markdown h3 { font-family: 'Space Grotesk'; letter-spacing: 1px; color: var(--text); margin: 12px 0 6px; }
+        .review-markdown h1, .review-markdown h2, .review-markdown h3 { font-family: 'Space Grotesk', sans-serif; letter-spacing: 1px; color: var(--text); margin: 12px 0 6px; }
         .review-markdown ul, .review-markdown ol { padding-left: 20px; margin: 0 0 10px; }
         .review-markdown li { margin-bottom: 4px; }
         .review-markdown blockquote { border-left: 3px solid var(--accent); padding-left: 12px; color: var(--muted); margin: 10px 0; }
@@ -171,7 +181,7 @@ export function GameModal({ game, onClose, readOnly = false }: { game: CabinetGa
 
               {/* Title + subtitle */}
               <div>
-                <h2 style={{ margin: '0 0 4px', fontFamily: 'Space Grotesk', fontSize: isMobile ? 26 : 30, letterSpacing: 0.1, color: 'var(--text)', lineHeight: 1.05 }}>
+                <h2 style={{ margin: '0 0 4px', fontFamily: 'Space Grotesk, sans-serif', fontSize: isMobile ? 26 : 30, letterSpacing: 0.1, color: 'var(--text)', lineHeight: 1.05 }}>
                   {game.title}
                 </h2>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px 8px', alignItems: 'center' }}>
@@ -191,7 +201,7 @@ export function GameModal({ game, onClose, readOnly = false }: { game: CabinetGa
                     const s = metacriticStyle(metacritic)
                     return (
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <div style={{ width: 42, height: 42, borderRadius: 8, background: s.bg, border: `1px solid ${s.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Space Grotesk', fontSize: 20, color: s.color, letterSpacing: 0.5, flexShrink: 0 }}>
+                        <div style={{ width: 42, height: 42, borderRadius: 8, background: s.bg, border: `1px solid ${s.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Space Grotesk, sans-serif', fontSize: 20, color: s.color, letterSpacing: 0.5, flexShrink: 0 }}>
                           {metacritic}
                         </div>
                         <div>
@@ -276,7 +286,12 @@ export function GameModal({ game, onClose, readOnly = false }: { game: CabinetGa
               }
             </div>
 
-
+            {/* Badges overlaid on top of the panel */}
+            {readOnly && (
+              <div style={{ position: 'absolute', top: 12, left: 12, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', color: 'var(--muted)', fontSize: 11, fontWeight: 600, padding: '4px 10px', borderRadius: 6, letterSpacing: 0.5 }}>
+                View Only
+              </div>
+            )}
             <button
               onClick={close}
               style={{ position: 'absolute', top: 12, right: 12, width: 28, height: 28, borderRadius: '50%', border: 'none', background: 'rgba(0,0,0,0.55)', color: '#fff', cursor: 'pointer', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)', transition: 'background 0.15s', zIndex: 1 }}
@@ -296,20 +311,12 @@ export function GameModal({ game, onClose, readOnly = false }: { game: CabinetGa
               <Section label="STATUS">
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                   {STATUSES.map(s => (
-                    <button key={s} onClick={() => markDirty(setPendingStatus)(s)} style={{ padding: '8px 16px', borderRadius: 8, border: 'none', background: pendingStatus === s ? STATUS_COLORS[s] : 'var(--surface2)', color: pendingStatus === s ? (s === 'unplayed' ? '#fff' : '#000') : 'var(--muted)', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', transition: 'all 0.15s', transform: pendingStatus === s ? 'scale(1.05)' : 'scale(1)', boxShadow: pendingStatus === s ? `0 4px 16px ${STATUS_COLORS[s]}55` : 'none' }}>
+                    <button key={s} onClick={() => markDirty(setPendingStatus)(s)} style={{ padding: '8px 16px', borderRadius: 8, border: 'none', background: pendingStatus === s ? STATUS_COLORS[s] : 'var(--surface2)', color: pendingStatus === s ? (s === 'unplayed' ? '#fff' : '#000') : 'var(--muted)', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'Rethink Sans, sans-serif', transition: 'all 0.15s', transform: pendingStatus === s ? 'scale(1.05)' : 'scale(1)', boxShadow: pendingStatus === s ? `0 4px 16px ${STATUS_COLORS[s]}55` : 'none' }}>
                       {STATUS_LABELS[s]}
                     </button>
                   ))}
                 </div>
               </Section>
-            )}
-
-            {/* Read-only notice — inline, never overlaps content */}
-            {readOnly && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 13px', borderRadius: 9, background: 'var(--surface2)', border: '1px solid var(--border)' }}>
-                <span style={{ fontSize: 14 }}>👁</span>
-                <span style={{ fontSize: 12, color: 'var(--muted)', fontWeight: 500 }}>You're viewing this cabinet in read-only mode</span>
-              </div>
             )}
 
             {/* Status — read-only badge */}
@@ -326,12 +333,12 @@ export function GameModal({ game, onClose, readOnly = false }: { game: CabinetGa
               <Section label="YOUR RATING">
                 <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
                   {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => (
-                    <button key={n} onClick={() => markDirty(setPendingRating)(pendingRating === n ? null : n)} style={{ width: 36, height: 36, borderRadius: 7, border: 'none', background: (pendingRating ?? 0) >= n ? 'var(--accent)' : 'var(--surface2)', color: (pendingRating ?? 0) >= n ? '#000' : 'var(--muted)', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', transition: 'all 0.12s', transform: (pendingRating ?? 0) >= n ? 'scale(1.08)' : 'scale(1)' }}>
+                    <button key={n} onClick={() => markDirty(setPendingRating)(pendingRating === n ? null : n)} style={{ width: 36, height: 36, borderRadius: 7, border: 'none', background: (pendingRating ?? 0) >= n ? 'var(--accent)' : 'var(--surface2)', color: (pendingRating ?? 0) >= n ? '#000' : 'var(--muted)', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'Rethink Sans, sans-serif', transition: 'all 0.12s', transform: (pendingRating ?? 0) >= n ? 'scale(1.08)' : 'scale(1)' }}>
                       {n}
                     </button>
                   ))}
                   {pendingRating && (
-                    <span style={{ marginLeft: 6, fontFamily: 'Space Grotesk', fontSize: 26, color: 'var(--accent)', letterSpacing: 0.1 }}>{pendingRating}/10</span>
+                    <span style={{ marginLeft: 6, fontFamily: 'Space Grotesk, sans-serif', fontSize: 26, color: 'var(--accent)', letterSpacing: 1 }}>{pendingRating}/10</span>
                   )}
                 </div>
               </Section>
@@ -346,7 +353,7 @@ export function GameModal({ game, onClose, readOnly = false }: { game: CabinetGa
                       {n}
                     </div>
                   ))}
-                  <span style={{ marginLeft: 6, fontFamily: 'Space Grotesk', fontSize: 26, color: 'var(--accent)', letterSpacing: 0.1 }}>{game.rating}/10</span>
+                  <span style={{ marginLeft: 6, fontFamily: 'Space Grotesk, sans-serif', fontSize: 26, color: 'var(--accent)', letterSpacing: 1 }}>{game.rating}/10</span>
                 </div>
               </Section>
             )}
@@ -400,7 +407,7 @@ export function GameModal({ game, onClose, readOnly = false }: { game: CabinetGa
               <button
                 onClick={confirm}
                 disabled={!dirty}
-                style={{ width: '100%', padding: '12px 20px', borderRadius: 10, border: 'none', background: dirty ? 'var(--accent)' : 'var(--surface2)', color: dirty ? '#000' : 'var(--muted)', fontWeight: 700, fontSize: 14, cursor: dirty ? 'pointer' : 'not-allowed', fontFamily: 'DM Sans, sans-serif', transition: 'all 0.2s', boxShadow: dirty ? '0 4px 20px rgba(232,255,71,0.25)' : 'none' }}
+                style={{ width: '100%', padding: '12px 20px', borderRadius: 10, border: 'none', background: dirty ? 'var(--accent)' : 'var(--surface2)', color: dirty ? '#000' : 'var(--muted)', fontWeight: 700, fontSize: 14, cursor: dirty ? 'pointer' : 'not-allowed', fontFamily: 'Rethink Sans, sans-serif', transition: 'all 0.2s', boxShadow: dirty ? '0 4px 20px rgba(232,255,71,0.25)' : 'none' }}
               >
                 {dirty ? '✓ Save changes' : 'No changes'}
               </button>
@@ -413,7 +420,7 @@ export function GameModal({ game, onClose, readOnly = false }: { game: CabinetGa
                   const s = listStyles[l]
                   return (
                     <button key={l} onClick={() => { moveToList(game.id, l); close() }}
-                      style={{ flex: 1, padding: '11px 16px', borderRadius: 10, border: `1px solid ${s.border}`, background: s.bg, color: s.color, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', transition: 'filter 0.15s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
+                      style={{ flex: 1, padding: '11px 16px', borderRadius: 10, border: `1px solid ${s.border}`, background: s.bg, color: s.color, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'Rethink Sans, sans-serif', transition: 'filter 0.15s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
                       onMouseEnter={e => (e.currentTarget.style.filter = 'brightness(1.2)')}
                       onMouseLeave={e => (e.currentTarget.style.filter = 'brightness(1)')}
                     >
@@ -422,7 +429,7 @@ export function GameModal({ game, onClose, readOnly = false }: { game: CabinetGa
                   )
                 })}
                 <button onClick={() => { removeGame(game.id); close() }}
-                  style={{ padding: '11px 16px', borderRadius: 10, border: 'none', background: '#3f1a1a', color: '#f87171', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', transition: 'background 0.15s' }}
+                  style={{ padding: '11px 16px', borderRadius: 10, border: 'none', background: '#3f1a1a', color: '#f87171', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'Rethink Sans, sans-serif', transition: 'background 0.15s' }}
                   onMouseEnter={e => (e.currentTarget.style.background = '#5a2020')}
                   onMouseLeave={e => (e.currentTarget.style.background = '#3f1a1a')}
                 >
@@ -441,7 +448,7 @@ export function GameModal({ game, onClose, readOnly = false }: { game: CabinetGa
 function Section({ label, children }: { label: React.ReactNode; children: React.ReactNode }) {
   return (
     <div>
-      <div style={{ color: 'var(--muted)', fontSize: 10, letterSpacing: 0.1, fontWeight: 700, marginBottom: 10 }}>{label}</div>
+      <div style={{ color: 'var(--muted)', fontSize: 10, letterSpacing: 2, fontWeight: 700, marginBottom: 10 }}>{label}</div>
       {children}
     </div>
   )
