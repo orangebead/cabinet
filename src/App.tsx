@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom'
 import { supabase } from './lib/supabase'
 import { useAuthStore } from './store/authStore'
 import { useCabinetStore } from './store/cabinetStore'
@@ -23,24 +22,64 @@ export type Page =
   | { id: 'view-profile'; username: string }
   | { id: 'view-cabinet'; userId: string; username: string }
 
-// ── Dashboard — only rendered when authed ────────────────────────────────────
-function Dashboard() {
-  const { user } = useAuthStore()
-  const { profile, loadingProfile } = useProfileStore()
-  const isMobile = useIsMobile()
+function App() {
+  const { user, loading, setUser, setLoading } = useAuthStore()
+  const fetchGames = useCabinetStore(s => s.fetchGames)
+  const { profile, loadingProfile, fetchProfile } = useProfileStore()
   const [page, setPage] = useState<Page>({ id: 'cabinet' })
+  const isMobile = useIsMobile()
+  const [showLanding, setShowLanding] = useState(true)
 
   useRealtimeNotifications(user?.id)
 
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null)
+      setLoading(false)
+      if (session?.user) {
+        setShowLanding(false) // active session — skip landing
+        fetchGames(session.user.id)
+        fetchProfile(session.user.id)
+      }
+    })
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+      if (session?.user) {
+        setShowLanding(false) // just logged in — skip landing
+        fetchGames(session.user.id)
+        fetchProfile(session.user.id)
+      } else {
+        useCabinetStore.setState({ games: [] })
+      }
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
+
+  // ── Landing — shown first to unauthenticated users ─────────────────────────
+  // Must be before the loading check so it renders immediately on first visit
+  // without waiting for Supabase to resolve the session.
+  if (showLanding && !user && !loading) {
+    return <LandingPage onEnter={() => setShowLanding(false)} />
+  }
+
+  if (loading) return <Splash />
+  if (!user) return <AuthPage />
   if (loadingProfile) return <Splash />
-  if (!profile) return <ProfileSetupPage userId={user!.id} />
+  if (!profile) return <ProfileSetupPage userId={user.id} />
 
   const isDynamic = page.id === 'view-profile' || page.id === 'view-cabinet'
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg)' }}>
       {!isMobile && <Sidebar currentPage={page.id} onNavigate={setPage} />}
-      <div style={{ marginLeft: isMobile ? 0 : 220, flex: 1, minWidth: 0, paddingBottom: isMobile ? 70 : 0 }}>
+
+      <div style={{
+        marginLeft: isMobile ? 0 : 220,
+        flex: 1, minWidth: 0,
+        paddingBottom: isMobile ? 70 : 0,
+      }}>
         <div style={{ display: !isDynamic && page.id === 'cabinet' ? 'block' : 'none' }}>
           <CabinetPage />
         </div>
@@ -67,70 +106,9 @@ function Dashboard() {
           />
         )}
       </div>
+
       {isMobile && <BottomNav currentPage={page.id} onNavigate={setPage} />}
     </div>
-  )
-}
-
-// ── Root — handles session init and routing ───────────────────────────────────
-function Root() {
-  const { user, loading, setUser, setLoading } = useAuthStore()
-  const fetchGames = useCabinetStore(s => s.fetchGames)
-  const { fetchProfile } = useProfileStore()
-  const navigate = useNavigate()
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null)
-      setLoading(false)
-      if (session?.user) {
-        fetchGames(session.user.id)
-        fetchProfile(session.user.id)
-        // If landing on / or /login with active session, go straight to app
-        const path = window.location.pathname
-        if (path === '/' || path === '/login') {
-          navigate('/app', { replace: true })
-        }
-      }
-    })
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
-      if (session?.user) {
-        fetchGames(session.user.id)
-        fetchProfile(session.user.id)
-        navigate('/app', { replace: true })
-      } else {
-        useCabinetStore.setState({ games: [] })
-        navigate('/', { replace: true })
-      }
-    })
-
-    return () => subscription.unsubscribe()
-  }, [])
-
-  if (loading) return <Splash />
-
-  return (
-    <Routes>
-      {/* Public */}
-      <Route path="/" element={<LandingPage onEnter={() => navigate('/login')} />} />
-      <Route path="/login" element={user ? <Navigate to="/app" replace /> : <AuthPage />} />
-
-      {/* Protected */}
-      <Route path="/app" element={user ? <Dashboard /> : <Navigate to="/" replace />} />
-
-      {/* Fallback */}
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
-  )
-}
-
-function App() {
-  return (
-    <BrowserRouter>
-      <Root />
-    </BrowserRouter>
   )
 }
 
