@@ -9,8 +9,8 @@ import { ListView } from '../components/game/ListView'
 import type { GameStatus } from '../types'
 
 const LIST_META = {
-  cabinet: { title: 'Cabinet', desc: 'Games you own or have played' },
-  backlog: { title: 'Backlog', desc: 'Games you plan to play' },
+  cabinet: { title: 'My Cabinet', desc: 'Games you own or have played' },
+  backlog: { title: 'Backlog', desc: 'I will get to playing these eventually...' },
   wishlist: { title: 'Wishlist', desc: 'Games you want to get' },
 }
 

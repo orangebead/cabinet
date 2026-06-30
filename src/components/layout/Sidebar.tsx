@@ -49,7 +49,7 @@ export function Sidebar({ currentPage, onNavigate }: Props) {
       <aside style={{ position: 'fixed', top: 0, left: 0, width: 220, height: '100vh', background: 'var(--surface)', borderRight: '1px solid var(--border)', display: 'flex', flexDirection: 'column', zIndex: 50, overflow: 'hidden' }}>
 
         <div style={{ padding: '28px 24px 20px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
-          <div style={{ fontFamily: 'Space Grotesk', fontSize: 32, letterSpacing: 0.1, color: 'var(--accent)', lineHeight: 1 }}>Cabinet</div>
+          <div style={{ fontFamily: 'Space Grotesk', fontSize: 32, letterSpacing: 0.1, color: 'var(--accent)', lineHeight: 1, fontWeight: 700 }}>Cabinet</div>
         </div>
 
         <nav style={{ padding: '16px 12px', flex: 1, display: 'flex', flexDirection: 'column' }}>

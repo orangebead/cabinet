@@ -57,7 +57,7 @@ export function AuthPage() {
 
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: 40 }}>
-          <div style={{ fontFamily: 'Space Grotesk', fontSize: 52, letterSpacing: 0.1, color: 'var(--accent)', lineHeight: 1 }}>Cabinet</div>
+          <div style={{ fontFamily: 'Space Grotesk', fontSize: 52, letterSpacing: 0.1, color: 'var(--accent)', lineHeight: 1, fontWeight: 700 }}>Cabinet</div>
           <div style={{ color: 'var(--muted)', fontSize: 20, marginTop: 6, letterSpacing: 0.1 }}>Your Personal Game Shelf</div>
         </div>
 
