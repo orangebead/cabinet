@@ -39,7 +39,7 @@ export function CabinetPage() {
         </div>
         <button
           onClick={() => setShowSearch(true)}
-          style={{ display: 'flex', alignItems: 'center', gap: 6, padding: isMobile ? '9px 14px' : '10px 18px', borderRadius: 8, border: 'none', background: 'var(--accent)', color: '#000', fontWeight: 700, fontSize: isMobile ? 12 : 13, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', flexShrink: 0 }}
+          style={{ display: 'flex', alignItems: 'center', gap: 6, padding: isMobile ? '9px 14px' : '10px 18px', borderRadius: 8, border: 'none', background: 'var(--accent)', color: '#000', fontWeight: 700, fontSize: isMobile ? 12 : 13, cursor: 'pointer', fontFamily: 'Rethink Sans, sans-serif', flexShrink: 0 }}
         >
           + {isMobile ? '' : 'Add Game'}
           {isMobile && 'Add'}
@@ -57,12 +57,12 @@ export function CabinetPage() {
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               placeholder="Filter by name..."
-              style={{ flex: 1, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text)', fontSize: 13, padding: '8px 12px', outline: 'none', fontFamily: 'DM Sans, sans-serif' }}
+              style={{ flex: 1, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text)', fontSize: 13, padding: '8px 12px', outline: 'none', fontFamily: 'Rethink Sans, sans-serif' }}
             />
             <select
               value={sortBy}
               onChange={e => setSortBy(e.target.value as any)}
-              style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text)', fontSize: 12, padding: '8px 10px', outline: 'none', cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', flexShrink: 0 }}
+              style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text)', fontSize: 12, padding: '8px 10px', outline: 'none', cursor: 'pointer', fontFamily: 'Rethink Sans, sans-serif', flexShrink: 0 }}
             >
               <option value="added_at">Date</option>
               <option value="rating">Rating</option>
@@ -82,12 +82,12 @@ export function CabinetPage() {
           </div>
 
           {/* Bottom row: status filters — horizontally scrollable on mobile */}
-          <div style={{ display: 'flex', gap: 4, overflowX: 'auto', paddingBottom: 2, WebkitOverflowScrolling: 'touch' as any }}>
+          <div style={{ display: 'flex', gap: 4, overflowX: 'auto', padding: '2px 2px 4px', WebkitOverflowScrolling: 'touch' as any }}>
             {(['all', 'unplayed', 'in_progress', 'completed', 'hundred_percent'] as const).map(s => (
               <button
                 key={s}
                 onClick={() => setFilterStatus(s)}
-                style={{ padding: '6px 12px', borderRadius: 7, border: 'none', background: filterStatus === s ? 'var(--surface2)' : 'transparent', color: filterStatus === s ? 'var(--text)' : 'var(--muted)', fontSize: 12, fontWeight: filterStatus === s ? 600 : 400, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif', outline: filterStatus === s ? '1px solid var(--border)' : 'none', flexShrink: 0, transition: 'all 0.15s' }}
+                style={{ padding: '6px 12px', borderRadius: 7, border: 'none', background: filterStatus === s ? 'var(--surface2)' : 'transparent', color: filterStatus === s ? 'var(--text)' : 'var(--muted)', fontSize: 12, fontWeight: filterStatus === s ? 600 : 400, cursor: 'pointer', fontFamily: 'Rethink Sans, sans-serif', outline: filterStatus === s ? '1px solid var(--border)' : 'none', flexShrink: 0, transition: 'all 0.15s' }}
               >
                 {s === 'all' ? 'All' : STATUS_LABELS[s as GameStatus]}
               </button>
